@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
-import { generateRoomCode, saveSession, uuid } from '../../lib/session';
-import { broadcastRoomEvent } from '../../hooks/useRoom';
+import { createRoom, joinRoom } from '../../lib/api';
+import { saveSession } from '../../lib/session';
 import '../../styles/Room.css';
 
 export default function JudgementRooms() {
@@ -18,25 +17,14 @@ export default function JudgementRooms() {
     if (!name.trim()) return setError('Enter your name first.');
     setLoading(true);
     setError('');
-
-    const code        = generateRoomCode();
-    const playerToken = uuid();
-
-    const { data: room, error: roomErr } = await supabase
-      .from('rooms')
-      .insert({ code, host_token: playerToken, game_type: 'judgement', max_players: 8 })
-      .select().single();
-
-    if (roomErr) { setError('Could not create room. Try again.'); setLoading(false); return; }
-
-    const { error: playerErr } = await supabase
-      .from('players')
-      .insert({ room_id: room.id, name: name.trim(), player_token: playerToken, seat: 1, is_host: true });
-
-    if (playerErr) { setError('Could not join room. Try again.'); setLoading(false); return; }
-
-    saveSession({ roomCode: code, playerToken, playerName: name.trim(), isHost: true });
-    navigate(`/games/judgement/${code}`);
+    try {
+      const result = await createRoom(name.trim(), 'judgement');
+      saveSession({ roomCode: result.room_code, playerToken: result.player_token, playerName: name.trim(), isHost: true });
+      navigate(`/games/judgement/${result.room_code}`);
+    } catch (err) {
+      setError(err.message || 'Could not create room. Try again.');
+      setLoading(false);
+    }
   }
 
   async function handleJoin(e) {
@@ -45,36 +33,14 @@ export default function JudgementRooms() {
     if (!joinCode.trim()) return setError('Enter the room code.');
     setLoading(true);
     setError('');
-
-    const code = joinCode.trim().toLowerCase();
-
-    const { data: room, error: roomErr } = await supabase
-      .from('rooms').select('*').eq('code', code).single();
-
-    if (roomErr || !room) { setError('Room not found. Check the code.'); setLoading(false); return; }
-    if (room.status === 'closed')  { setError('This room is already closed.'); setLoading(false); return; }
-    if (room.status === 'playing') { setError('Game already in progress.'); setLoading(false); return; }
-    if (room.game_type !== 'judgement') { setError('This is not a Judgement room.'); setLoading(false); return; }
-
-    const { data: existing } = await supabase
-      .from('players').select('id').eq('room_id', room.id).eq('status', 'active');
-
-    if ((existing?.length || 0) >= room.max_players) {
-      setError('Room is full (8 players max).'); setLoading(false); return;
+    try {
+      const result = await joinRoom(joinCode.trim().toLowerCase(), name.trim());
+      saveSession({ roomCode: result.room_code, playerToken: result.player_token, playerName: name.trim(), isHost: false });
+      navigate(`/games/judgement/${result.room_code}`);
+    } catch (err) {
+      setError(err.message || 'Could not join room. Try again.');
+      setLoading(false);
     }
-
-    const playerToken = uuid();
-    const seat        = (existing?.length || 0) + 1;
-
-    const { error: playerErr } = await supabase
-      .from('players')
-      .insert({ room_id: room.id, name: name.trim(), player_token: playerToken, seat, is_host: false });
-
-    if (playerErr) { setError('Could not join room. Try again.'); setLoading(false); return; }
-
-    saveSession({ roomCode: code, playerToken, playerName: name.trim(), isHost: false });
-    broadcastRoomEvent(code, 'players_updated');
-    navigate(`/games/judgement/${code}`);
   }
 
   return (

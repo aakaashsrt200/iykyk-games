@@ -5,15 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.api.routes.health import router as health_router
 from app.api.routes.games import router as games_router
+from app.api.routes.rooms import router as rooms_router
+from app.api.routes.ws import router as ws_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # ── Startup ───────────────────────────────────────────────────────────
     settings = get_settings()
     print(f"[iykyk-games] Starting in {settings.app_env} mode on :{settings.backend_port}")
     yield
-    # ── Shutdown ──────────────────────────────────────────────────────────
     print("[iykyk-games] Shutting down.")
 
 
@@ -30,7 +30,6 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # ── CORS ──────────────────────────────────────────────────────────────
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -39,9 +38,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # ── Routers ───────────────────────────────────────────────────────────
     app.include_router(health_router)
     app.include_router(games_router, prefix="/api")
+    app.include_router(rooms_router)
+    app.include_router(ws_router)
 
     return app
 

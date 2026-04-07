@@ -7,11 +7,9 @@
  *  3. Room closed → redirect home
  */
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { loadSession, saveSession, uuid } from '../../lib/session';
-import { supabase } from '../../lib/supabase';
-import { broadcastRoomEvent } from '../../hooks/useRoom';
+import { useState, useEffect } from 'react';
+import { loadSession, saveSession } from '../../lib/session';
+import { joinRoom } from '../../lib/api';
 import { useJudgementRoom } from '../../hooks/useJudgementRoom';
 import JudgementLobby from './JudgementLobby';
 import JudgementGame from '../games/JudgementGame';
@@ -29,28 +27,14 @@ function JoinViaLink({ code }) {
     if (!name.trim()) return setError('Enter your name.');
     setLoading(true);
     setError('');
-
-    const { data: room } = await supabase.from('rooms').select('*').eq('code', code).single();
-    if (!room)                   { setError('Room not found.');             setLoading(false); return; }
-    if (room.status === 'closed'){ setError('This room is closed.');        setLoading(false); return; }
-    if (room.status === 'playing'){ setError('Game already in progress.'); setLoading(false); return; }
-
-    const { data: existing } = await supabase
-      .from('players').select('id').eq('room_id', room.id).eq('status', 'active');
-    if ((existing?.length || 0) >= room.max_players) {
-      setError('Room is full.'); setLoading(false); return;
+    try {
+      const result = await joinRoom(code, name.trim());
+      saveSession({ roomCode: result.room_code, playerToken: result.player_token, playerName: name.trim(), isHost: false });
+      navigate(`/games/judgement/${code}`);
+    } catch (err) {
+      setError(err.message || 'Could not join. Try again.');
+      setLoading(false);
     }
-
-    const playerToken = uuid();
-    const seat        = (existing?.length || 0) + 1;
-    const { error: insertErr } = await supabase.from('players').insert({
-      room_id: room.id, name: name.trim(), player_token: playerToken, seat, is_host: false,
-    });
-    if (insertErr) { setError('Could not join. Try again.'); setLoading(false); return; }
-
-    saveSession({ roomCode: code, playerToken, playerName: name.trim(), isHost: false });
-    broadcastRoomEvent(code, 'players_updated');
-    navigate(`/games/judgement/${code}`);
   }
 
   return (
