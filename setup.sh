@@ -32,19 +32,22 @@ echo -e "${BOLD}╚════════════════════�
 # ── 1. Python via pyenv ───────────────────────────────────────────────────────
 info "Checking Python..."
 
-if ! command -v pyenv &>/dev/null; then
-    warn "pyenv not found. Installing pyenv..."
-    curl -fsSL https://pyenv.run | bash
+export PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
+export PATH="$PYENV_ROOT/bin:$PATH"
 
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init -)"
+if ! command -v pyenv &>/dev/null; then
+    if [[ -d "$PYENV_ROOT" ]]; then
+        # Directory exists but not in PATH — just initialise it
+        warn "pyenv directory found at $PYENV_ROOT but not in PATH. Re-initialising..."
+    else
+        warn "pyenv not found. Installing pyenv..."
+        curl -fsSL https://pyenv.run | bash
+    fi
+    eval "$(pyenv init -)" 2>/dev/null || true
     eval "$(pyenv virtualenv-init -)" 2>/dev/null || true
-    success "pyenv installed."
+    success "pyenv ready."
 else
-    export PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init -)"
+    eval "$(pyenv init -)" 2>/dev/null || true
     eval "$(pyenv virtualenv-init -)" 2>/dev/null || true
 fi
 
