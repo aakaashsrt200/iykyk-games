@@ -1,0 +1,510 @@
+/* ─── Judgement Game Design System ──────────────────────────────────────────── */
+
+/* CSS variables */
+:root {
+  --jdg-bg:        #060d1a;
+  --jdg-surface:   #0d1a2d;
+  --jdg-border:    rgba(255, 255, 255, 0.1);
+  --jdg-purple:    #7c3aed;
+  --jdg-purple-lt: #a78bfa;
+  --jdg-gold:      #f59e0b;
+  --jdg-green:     #10b981;
+  --jdg-red:       #ef4444;
+  --jdg-text:      #e8eaf0;
+  --jdg-dim:       #9ca3af;
+  --jdg-muted:     #6b7280;
+}
+
+/* ─── Page shell ─────────────────────────────────────────────────────────────── */
+.jdg-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--jdg-bg);
+  color: var(--jdg-text);
+  font-family: inherit;
+}
+
+.jdg-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--jdg-muted);
+  font-size: 1rem;
+}
+
+/* ─── Top bar ────────────────────────────────────────────────────────────────── */
+.jdg-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: var(--jdg-surface);
+  border-bottom: 1px solid var(--jdg-border);
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.jdg-topbar-left   { display: flex; align-items: center; gap: 10px; }
+.jdg-topbar-center { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.jdg-topbar-right  { display: flex; align-items: center; gap: 8px; }
+
+.jdg-game-title {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--jdg-text);
+  letter-spacing: 0.01em;
+}
+
+.jdg-round-badge {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  color: var(--jdg-dim);
+  font-weight: 600;
+}
+
+.jdg-trump-badge {
+  border: 1px solid;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.jdg-hand-badge {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  color: var(--jdg-dim);
+}
+
+/* ─── Game layout: 2-column on desktop ───────────────────────────────────────── */
+.jdg-game-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ─── Left: Player panel ─────────────────────────────────────────────────────── */
+.jdg-player-panel {
+  background: var(--jdg-surface);
+  border-right: 1px solid var(--jdg-border);
+  padding: 16px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jdg-player-tile {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.jdg-player-tile.active {
+  border-color: rgba(167, 139, 250, 0.6);
+  background: rgba(167, 139, 250, 0.08);
+  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.2), 0 4px 16px rgba(124, 58, 237, 0.15);
+}
+
+.jdg-player-tile.me {
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+.jdg-player-tile.spectating {
+  opacity: 0.45;
+}
+
+/* ─── Right: Main content ────────────────────────────────────────────────────── */
+.jdg-main-content {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Timer bar ──────────────────────────────────────────────────────────────── */
+.jdg-timer-track {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.jdg-timer-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.2s linear, background 0.5s ease;
+}
+
+/* ─── Trick area ─────────────────────────────────────────────────────────────── */
+.jdg-trick-area {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--jdg-border);
+  border-radius: 14px;
+  padding: 20px;
+  min-height: 140px;
+}
+
+.jdg-trick-label {
+  font-size: 0.75rem;
+  color: var(--jdg-dim);
+  margin: 0 0 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.jdg-trick-cards {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.jdg-trick-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.jdg-trick-name {
+  font-size: 0.68rem;
+  color: var(--jdg-dim);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ─── Waiting message ────────────────────────────────────────────────────────── */
+.jdg-waiting-msg {
+  text-align: center;
+  padding: 28px 20px;
+  color: var(--jdg-dim);
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────────── */
+.jdg-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  cursor: default;
+  font-family: inherit;
+  font-weight: 800;
+  user-select: none;
+  transition: transform 0.15s ease, border-color 0.15s, box-shadow 0.15s;
+  line-height: 1;
+  gap: 1px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.jdg-card-sm { width: 36px; height: 52px; font-size: 0.72rem; }
+.jdg-card-md { width: 46px; height: 64px; font-size: 0.88rem; }
+.jdg-card-lg { width: 58px; height: 82px; font-size: 1.05rem; }
+
+.jdg-card.playable {
+  cursor: pointer;
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
+}
+
+.jdg-card.playable:hover {
+  transform: translateY(-8px);
+  border-color: var(--jdg-purple-lt);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.4);
+}
+
+.jdg-card.playable:active {
+  transform: translateY(-3px);
+}
+
+.jdg-card.highlight {
+  border-color: rgba(167, 139, 250, 0.7);
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.25);
+}
+
+.jdg-card.dimmed {
+  opacity: 0.5;
+  filter: grayscale(30%);
+}
+
+.jdg-card-rank { font-size: 1em; line-height: 1; }
+.jdg-card-suit { font-size: 0.82em; line-height: 1; }
+
+/* ─── Hand area ──────────────────────────────────────────────────────────────── */
+.jdg-hand-area {
+  background: #0a1628;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 20px;
+  flex-shrink: 0;
+}
+
+.jdg-hand-label {
+  font-size: 0.72rem;
+  color: var(--jdg-dim);
+  margin: 0 0 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jdg-hand {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ─── Bidding panel ──────────────────────────────────────────────────────────── */
+.jdg-bidding-panel {
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.jdg-bid-grid {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.jdg-bid-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--jdg-text);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.jdg-bid-btn:hover:not(:disabled) {
+  background: rgba(167, 139, 250, 0.2);
+  border-color: rgba(167, 139, 250, 0.5);
+  transform: translateY(-2px);
+}
+
+.jdg-bid-btn.selected {
+  background: rgba(167, 139, 250, 0.3);
+  border-color: var(--jdg-purple-lt);
+  color: #c4b5fd;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2);
+}
+
+.jdg-bid-btn.forbidden {
+  opacity: 0.28;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.jdg-confirm-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+
+.jdg-confirm-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.jdg-confirm-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ─── Round result overlay ───────────────────────────────────────────────────── */
+.jdg-round-result-overlay {
+  background: var(--jdg-surface);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Game over ──────────────────────────────────────────────────────────────── */
+.jdg-game-over {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.jdg-trophy {
+  font-size: 4rem;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 16px rgba(245, 158, 11, 0.5));
+  animation: jdg-trophy-bounce 2s ease-in-out infinite;
+}
+
+@keyframes jdg-trophy-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.jdg-final-scores {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jdg-final-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+
+.jdg-final-row.winner {
+  background: rgba(167, 139, 250, 0.1);
+  border-color: rgba(167, 139, 250, 0.4);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.2);
+}
+
+.jdg-rank       { width: 28px; font-size: 1rem; }
+.jdg-final-name { flex: 1; font-weight: 700; color: var(--jdg-text); }
+.jdg-final-score { font-weight: 900; font-size: 1rem; color: var(--jdg-purple-lt); }
+
+/* ─── Score history modal ────────────────────────────────────────────────────── */
+.jdg-score-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.jdg-score-modal-box {
+  background: #0d1a2d;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Toast notifications ────────────────────────────────────────────────────── */
+.jdg-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1e2c45;
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--jdg-text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  animation: jdg-toast-in 0.25s ease;
+  max-width: 280px;
+}
+
+@keyframes jdg-toast-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Trump badge suit colors ────────────────────────────────────────────────── */
+.jdg-trump-spades   { color: #a78bfa; border-color: #a78bfa; background: rgba(167,139,250,0.1); }
+.jdg-trump-diamonds { color: #f87171; border-color: #f87171; background: rgba(248,113,113,0.1); }
+.jdg-trump-clubs    { color: #34d399; border-color: #34d399; background: rgba(52,211,153,0.1); }
+.jdg-trump-hearts   { color: #f472b6; border-color: #f472b6; background: rgba(244,114,182,0.1); }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .jdg-game-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .jdg-player-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--jdg-border);
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .jdg-player-tile {
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+
+  .jdg-topbar-center { display: none; }
+
+  .jdg-card-md { width: 40px; height: 56px; font-size: 0.75rem; }
+  .jdg-card-lg { width: 50px; height: 70px; font-size: 0.9rem; }
+
+  .jdg-toast { bottom: 80px; right: 12px; left: 12px; max-width: none; }
+
+  .jdg-main-content { padding: 14px; }
+}
+
+@media (max-width: 480px) {
+  .jdg-topbar { padding: 8px 14px; }
+  .jdg-hand-area { padding: 12px 14px; }
+}

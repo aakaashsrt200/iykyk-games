@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  # ── Frontend (React served via Nginx) ────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://localhost:8000
+    container_name: iykyk-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - iykyk-network
+    restart: unless-stopped
+
+  # ── Backend (FastAPI) ─────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: iykyk-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - APP_ENV=production
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - BACKEND_RELOAD=false
+    volumes:
+      - ./backend:/app
+    networks:
+      - iykyk-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  iykyk-network:
+    driver: bridge
