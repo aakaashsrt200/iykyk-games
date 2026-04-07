@@ -132,23 +132,38 @@ cd "$ROOT_DIR"
 # ── 5. .env files ────────────────────────────────────────────────────────────
 info "Setting up .env files..."
 
-if [[ ! -f "$ROOT_DIR/.env" ]]; then
-    cp "$ROOT_DIR/.env.template" "$ROOT_DIR/.env"
-    warn "Created .env from template — fill in your secrets!"
-else
-    success ".env already exists."
-fi
-
 if [[ ! -f "$ROOT_DIR/frontend/.env" ]]; then
     cp "$ROOT_DIR/frontend/.env.example" "$ROOT_DIR/frontend/.env"
     success "Created frontend/.env from example."
+else
+    success "frontend/.env already exists."
 fi
 
 if [[ ! -f "$ROOT_DIR/backend/.env" ]]; then
-    warn "backend/.env not found — backend will use defaults."
+    warn "backend/.env not found — creating from template..."
+    cat > "$ROOT_DIR/backend/.env" << 'ENVEOF'
+APP_ENV=development
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+BACKEND_RELOAD=true
+SECRET_KEY=change-me-generate-with-openssl-rand-hex-32
+ALLOWED_ORIGINS=http://localhost:3000
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+DATABASE_URL=
+REDIS_URL=
+ENVEOF
+    warn "Created backend/.env — add your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY!"
+else
+    success "backend/.env already exists."
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo -e "\n${GREEN}${BOLD}✓ Setup complete!${RESET}"
-echo -e "  Run ${CYAN}./host.sh${RESET} to start the application."
-echo -e "  Edit ${CYAN}.env${RESET} to add your API keys.\n"
+echo -e "  Run ${CYAN}./host.sh${RESET} to start the application.\n"
+echo -e "  ${YELLOW}Required secrets in backend/.env:${RESET}"
+echo -e "    SUPABASE_URL             — your Supabase project URL"
+echo -e "    SUPABASE_SERVICE_ROLE_KEY — from Supabase dashboard → Settings → API"
+echo -e "    ANTHROPIC_API_KEY        — optional, for AI features\n"

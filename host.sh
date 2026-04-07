@@ -42,10 +42,24 @@ kill_port "$FRONTEND_PORT"
 kill_port "$BACKEND_PORT"
 sleep 0.5
 
-# ── Activate backend venv ─────────────────────────────────────────────────────
+# ── Pre-flight checks ─────────────────────────────────────────────────────────
 VENV="$ROOT_DIR/backend/venv"
 if [[ ! -d "$VENV" ]]; then
     echo -e "${RED}[host] ✗ backend/venv not found. Run ./setup.sh first.${RESET}" >&2
+    exit 1
+fi
+
+BACKEND_ENV="$ROOT_DIR/backend/.env"
+if [[ ! -f "$BACKEND_ENV" ]]; then
+    echo -e "${RED}[host] ✗ backend/.env not found. Run ./setup.sh first.${RESET}" >&2
+    exit 1
+fi
+
+# Check SUPABASE_SERVICE_ROLE_KEY is set and not a placeholder
+SUPA_KEY=$(grep -E '^SUPABASE_SERVICE_ROLE_KEY=' "$BACKEND_ENV" | cut -d= -f2-)
+if [[ -z "$SUPA_KEY" || "$SUPA_KEY" == *"PASTE"* ]]; then
+    echo -e "${RED}[host] ✗ SUPABASE_SERVICE_ROLE_KEY is not set in backend/.env${RESET}" >&2
+    echo -e "       Get it from: Supabase dashboard → Settings → API → service_role key" >&2
     exit 1
 fi
 
@@ -75,7 +89,7 @@ info "Starting React frontend on :$FRONTEND_PORT..."
         # shellcheck disable=SC1091
         source "${NVM_DIR:-$HOME/.nvm}/nvm.sh"
     fi
-    BROWSER=none npm start
+    npm run dev
 ) &
 FRONTEND_PID=$!
 success "Frontend PID: $FRONTEND_PID"
