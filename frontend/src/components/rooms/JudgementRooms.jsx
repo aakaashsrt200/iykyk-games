@@ -66,7 +66,7 @@ export default function JudgementRooms() {
 
         {!mode && (
           <div className="room-mode-btns">
-            <button className="room-btn primary" style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)' }} onClick={() => setMode('create')}>
+            <button className="room-btn primary" onClick={() => setMode('create')}>
               Create Room
             </button>
             <button className="room-btn secondary" onClick={() => setMode('join')}>
@@ -81,7 +81,7 @@ export default function JudgementRooms() {
             {error && <p className="room-error">{error}</p>}
             <div className="room-form-actions">
               <button type="button" className="room-btn secondary sm" onClick={() => { setMode(null); setError(''); }}>← Back</button>
-              <button type="submit" className="room-btn primary" style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)' }} disabled={loading || !name.trim()}>
+              <button type="submit" className="room-btn primary" disabled={loading || !name.trim()}>
                 {loading ? 'Creating…' : 'Create Room →'}
               </button>
             </div>
@@ -104,7 +104,7 @@ export default function JudgementRooms() {
             {error && <p className="room-error">{error}</p>}
             <div className="room-form-actions">
               <button type="button" className="room-btn secondary sm" onClick={() => { setMode(null); setError(''); }}>← Back</button>
-              <button type="submit" className="room-btn primary" style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)' }} disabled={loading || !name.trim() || !joinCode.trim()}>
+              <button type="submit" className="room-btn primary" disabled={loading || !name.trim() || !joinCode.trim()}>
                 {loading ? 'Joining…' : 'Join Room →'}
               </button>
             </div>

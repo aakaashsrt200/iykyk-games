@@ -68,7 +68,7 @@ export default function GameCard({ game }) {
 
         <div className="game-meta">
           <div className="meta-item">
-            <span className="meta-icon">👥</span>
+            <span className="meta-icon" aria-hidden="true">♟</span>
             <span className="meta-value">{players} players</span>
           </div>
         </div>

@@ -16,6 +16,7 @@ function LandingPage() {
     <>
       <Navbar />
       <main>
+        <HeroSection />
         <GamesGrid />
       </main>
       <Footer />

@@ -46,7 +46,9 @@
   --radius-md:  14px;
   --radius-lg:  20px;
 
-  --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-props: transform, box-shadow, border-color, opacity, background-color, color;
+  --transition: var(--transition-props) 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.42, 0.64, 1);
 
   --font-display: 'Cinzel', serif;
   --font-body:    'Inter', sans-serif;
@@ -112,6 +114,7 @@ body {
   color: var(--text-primary);
   letter-spacing: 1px;
   flex-shrink: 0;
+  min-height: 44px;
 }
 
 .navbar-logo .suit {
@@ -465,13 +468,13 @@ body {
   border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* ? rules button */
+/* ? rules button — touch target ≥ 44×44px (WCAG 2.5.5) */
 .rules-icon-btn {
-  width: 22px;
-  height: 22px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: transparent;
+  border: none;
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 800;
@@ -482,13 +485,30 @@ body {
   transition: var(--transition);
   flex-shrink: 0;
   line-height: 1;
+  margin: -11px; /* Maintain visual layout while expanding hit area */
+  position: relative;
+}
+
+/* Inner visual circle stays 22px */
+.rules-icon-btn::after {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  z-index: -1;
+  transition: var(--transition);
+}
+
+.rules-icon-btn:hover::after {
+  background: var(--card-accent, var(--gold));
+  border-color: var(--card-accent, var(--gold));
 }
 
 .rules-icon-btn:hover {
-  background: var(--card-accent, var(--gold));
-  border-color: var(--card-accent, var(--gold));
   color: #000;
-  transform: scale(1.1);
 }
 
 .game-card-body {
@@ -970,4 +990,32 @@ body {
     gap: 24px;
   }
   .footer-brand { grid-column: auto; }
+}
+
+/* ─── Accessibility ─────────────────────────────────────────────────────────── */
+
+/* Global focus-visible ring — keyboard nav */
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Reduced motion — respect user OS preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .float-suit { display: none; }
+  .games-group-dot { animation: none; }
+  .animate-in { animation: none; }
+  .result-overlay-card { animation: none; }
+  .result-overlay-card.exiting { animation: none; opacity: 0; }
+}
 }

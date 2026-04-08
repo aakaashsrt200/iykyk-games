@@ -118,14 +118,14 @@
 }
 
 .room-btn.primary {
-  background: linear-gradient(135deg, #e63946, #c1121f);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(230,57,70,0.35);
+  background: linear-gradient(135deg, var(--gold), #d97706);
+  color: var(--bg-primary);
+  box-shadow: 0 4px 14px rgba(245,158,11,0.35);
 }
 
 .room-btn.primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #f0454f, #e63946);
-  box-shadow: 0 6px 20px rgba(230,57,70,0.5);
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  box-shadow: 0 6px 20px rgba(245,158,11,0.5);
   transform: translateY(-1px);
 }
 
