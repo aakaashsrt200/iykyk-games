@@ -55,7 +55,7 @@ def start_game(players: list[dict]) -> dict:
     }
     return {
         'phase': 'betting',
-        'deck': [],
+        'deck': build_deck(10),
         'dealer_hand': [],
         'active_seat': None,
         'seats': seats,
@@ -82,7 +82,7 @@ def deal(gs: dict) -> dict | None:
     if not betting_seats:
         return None
 
-    deck = build_deck(6)
+    deck = list(gs['deck'])
     new_seats = dict(gs['seats'])
 
     for s in list(new_seats.keys()):
@@ -210,13 +210,16 @@ def run_dealer(gs: dict) -> tuple[dict, dict]:
 
 
 def new_round(gs: dict, players: list[dict]) -> dict:
+    deck = list(gs.get('deck', []))
+    if len(deck) < int(0.20 * 520):
+        deck = build_deck(10)
     fresh_seats = {
         str(p['seat']): {'player_id': p['id'], 'hand': [], 'bet': 0, 'action': None}
         for p in players if p.get('status') == 'active'
     }
     return {
         'phase': 'betting',
-        'deck': [],
+        'deck': deck,
         'dealer_hand': [],
         'active_seat': None,
         'seats': fresh_seats,
