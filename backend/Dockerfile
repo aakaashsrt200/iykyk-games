@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 # Install dependencies into a target dir (keeps final image clean)
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --prefix=/install --no-cache-dir -r requirements.txt
 
@@ -21,8 +21,8 @@ WORKDIR /app
 # Copy installed packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy application code
-COPY . .
+# Copy application code from backend/ subdirectory
+COPY backend/ .
 
 # Ensure the app package is importable
 ENV PYTHONPATH=/app
