@@ -119,7 +119,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  min-height: 90px;
+  min-height: 130px;
   align-items: center;
 }
 
@@ -481,6 +481,7 @@
   .mbj-seats-grid { grid-template-columns: 1fr 1fr; }
   .mbj-seat { padding: 8px 10px; }
   .mbj-action-btns { gap: 7px; }
-  .bj-card { width: 52px; height: 76px; }
-  .bj-card-center-suit { font-size: 1.4rem; }
+  .bj-card { width: 60px; height: 86px; }
+  .bj-card-center-suit { font-size: 1.8rem; }
+  .bj-card-rank { font-size: 0.85rem; }
 }
