@@ -340,7 +340,7 @@ export default function JudgementGame({
                 <Avatar name={p.name} index={playerIndex(p)} size={34} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#e8eaf0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '90px' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#e8eaf0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '130px' }}>
                       {p.name}
                     </span>
                     {isDealer && (
