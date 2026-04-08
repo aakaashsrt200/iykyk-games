@@ -249,6 +249,7 @@
   pointer-events: none; z-index: 4;
 }
 
+/* Fly-in from deck position (top-left), stagger per card via --card-index */
 @keyframes bj-deal {
   0%   { transform: translateX(-90px) translateY(-50px) rotate(-10deg) scale(0.65); opacity: 0; }
   55%  { opacity: 1; }
