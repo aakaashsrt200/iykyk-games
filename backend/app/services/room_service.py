@@ -41,8 +41,8 @@ async def create_room(game_type: str, host_token: str) -> dict:
         'game_type': game_type,
         'max_players': 8,
         'status': 'waiting',
-    }).select().single().execute())
-    return resp.data
+    }).execute())
+    return resp.data[0]
 
 
 async def create_player(room_id: str, name: str, player_token: str, seat: int, is_host: bool) -> dict:
@@ -54,28 +54,29 @@ async def create_player(room_id: str, name: str, player_token: str, seat: int, i
         'is_host': is_host,
         'status': 'active',
         'balance': 1000,
-    }).select().single().execute())
-    return resp.data
+    }).execute())
+    return resp.data[0]
 
 
 async def update_room(room_id: str, **kwargs) -> dict:
-    resp = await db(lambda: get_supabase().table('rooms').update(kwargs).eq('id', room_id).select().single().execute())
-    return resp.data
+    resp = await db(lambda: get_supabase().table('rooms').update(kwargs).eq('id', room_id).execute())
+    return resp.data[0] if resp.data else {}
 
 
 async def update_player(player_id: str, **kwargs) -> dict:
-    resp = await db(lambda: get_supabase().table('players').update(kwargs).eq('id', player_id).select().single().execute())
-    return resp.data
+    resp = await db(lambda: get_supabase().table('players').update(kwargs).eq('id', player_id).execute())
+    return resp.data[0] if resp.data else {}
 
 
 async def apply_balance_deltas(players: list[dict], deltas: dict) -> None:
-    """Apply balance changes for dealer settle. deltas: {player_id: delta}"""
+    """Apply balance changes after dealer settle. deltas: {player_id: net_change}"""
     for player in players:
         delta = deltas.get(player['id'])
         if delta is not None:
             new_balance = player['balance'] + delta
             pid = player['id']
-            await db(lambda: get_supabase().table('players').update({'balance': new_balance}).eq('id', pid).execute())
+            nb = new_balance
+            await db(lambda pid=pid, nb=nb: get_supabase().table('players').update({'balance': nb}).eq('id', pid).execute())
 
 
 async def count_active_players(room_id: str) -> int:
