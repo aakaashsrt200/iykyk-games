@@ -24,6 +24,9 @@ COPY --from=builder /install /usr/local
 # Copy application code
 COPY . .
 
+# Ensure the app package is importable
+ENV PYTHONPATH=/app
+
 # Non-root user for security
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 USER appuser
