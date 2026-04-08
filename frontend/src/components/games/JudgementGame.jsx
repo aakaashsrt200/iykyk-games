@@ -3,6 +3,7 @@ import {
   SUIT_SYMBOLS, SUIT_NAMES,
   ROUND_PAUSE_MS, scoreRound,
 } from '../../lib/judgement';
+import { useGameStore } from '../../store/gameStore';
 import '../../styles/Judgement.css';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -35,7 +36,7 @@ function Avatar({ name, index, size = 32 }) {
 }
 
 // ─── Card component ─────────────────────────────────────────────────────────────
-function Card({ card, onClick, dimmed, highlight, size = 'md' }) {
+function Card({ card, onClick, dimmed, highlight, size = 'md', cardIndex }) {
   if (!card) return null;
   const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
   const cardColor = isRed ? '#dc2626' : '#111827';
@@ -43,7 +44,7 @@ function Card({ card, onClick, dimmed, highlight, size = 'md' }) {
   return (
     <button
       className={`jdg-card jdg-card-${size}${dimmed ? ' dimmed' : ''}${highlight ? ' highlight' : ''}${onClick ? ' playable' : ''}`}
-      style={{ color: cardColor }}
+      style={{ color: cardColor, '--card-index': cardIndex ?? 0 }}
       onClick={onClick}
       disabled={!onClick}
     >
@@ -210,11 +211,23 @@ function ScoreHistoryModal({ round_history, players, seats, onClose }) {
 
 // ─── Main game component ────────────────────────────────────────────────────────
 export default function JudgementGame({
-  room, players, me, isHost,
-  gs, phase, isMyTurn, myData, myValidCards, forbidden,
   onPlaceBid, onPlayCard, onNextRound,
   onLeave, onClose,
 }) {
+  // Read from store
+  const room         = useGameStore(s => s.room);
+  const players      = useGameStore(s => s.players);
+  const me           = useGameStore(s => s.me);
+  const isHost       = useGameStore(s => s.isHost);
+  const gs           = useGameStore(s => s.gs);
+  const phase        = useGameStore(s => s.phase);
+  const isMyTurn     = useGameStore(s => s.isMyTurn);
+  const myData       = useGameStore(s => s.myData);
+  const myValidCards = useGameStore(s => s.myValidCards);
+  const forbidden    = useGameStore(s => s.forbidden);
+  const canBid       = useGameStore(s => s.canBid);
+  const canPlay      = useGameStore(s => s.canPlay);
+
   const [bidInput,     setBidInput]     = useState(null);
   const [showHistory,  setShowHistory]  = useState(false);
   const [toast,        setToast]        = useState(null);
@@ -228,7 +241,6 @@ export default function JudgementGame({
     if (!gs) return;
     const prevPhase  = prevPhaseRef.current;
     const wasMyTurn  = prevMyTurnRef.current;
-    const prevRound  = prevRoundIdxRef.current;
 
     // "Your turn to bid!"
     if (phase === 'bidding' && isMyTurn && (!wasMyTurn || prevPhase !== 'bidding')) {
@@ -385,7 +397,7 @@ export default function JudgementGame({
             return (
               <div key={i} className="jdg-trick-slot">
                 <div style={{ position: 'relative' }}>
-                  <Card card={tc.card} size="lg" highlight={isWinner} />
+                  <Card card={tc.card} size="lg" highlight={isWinner} cardIndex={i} />
                   {isWinner && (
                     <div style={{
                       position: 'absolute', top: '-8px', right: '-8px',
@@ -411,7 +423,7 @@ export default function JudgementGame({
 
   // ── Bidding panel ───────────────────────────────────────────────────────────
   function renderBiddingPanel() {
-    if (!isMyTurn || phase !== 'bidding') return null;
+    if (!canBid) return null;
     const bids = Array.from({ length: hand_size + 1 }, (_, i) => i);
     return (
       <div className="jdg-bidding-panel">
@@ -499,7 +511,7 @@ export default function JudgementGame({
         <div className="jdg-hand">
           {myData.hand.map((card, i) => {
             if (isBiddingPhase) {
-              return <Card key={i} card={card} size="md" dimmed />;
+              return <Card key={i} card={card} size="md" dimmed cardIndex={i} />;
             }
             const isValid = myValidCards.some(c => c.suit === card.suit && c.rank === card.rank);
             return (
@@ -507,9 +519,10 @@ export default function JudgementGame({
                 key={i}
                 card={card}
                 size="md"
-                dimmed={isMyTurn ? !isValid : true}
-                highlight={isMyTurn && isValid}
-                onClick={isMyTurn && isValid ? () => onPlayCard(card) : null}
+                dimmed={!canPlay || !isValid}
+                highlight={canPlay && isValid}
+                onClick={canPlay && isValid ? () => onPlayCard(card) : null}
+                cardIndex={i}
               />
             );
           })}

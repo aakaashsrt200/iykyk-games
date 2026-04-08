@@ -13,6 +13,7 @@ import { joinRoom } from '../../lib/api';
 import RoomLobby from './RoomLobby';
 import MultiplayerBlackjack from '../games/MultiplayerBlackjack';
 import { useRoom } from '../../hooks/useRoom';
+import { useGameStore } from '../../store/gameStore';
 import '../../styles/Room.css';
 
 // ── Join form shown when visiting a shared link without a session ─────────────
@@ -91,11 +92,17 @@ function RoomWithSession({ code }) {
   const navigate = useNavigate();
 
   const {
-    room, players, me, loading, error,
-    isHost, gs, phase, isMyTurn, myData, canDouble,
     leaveRoom, closeRoom, startGame,
     placeBet, deal, hit, stand, doubleDown, newRound,
   } = useRoom(code);
+
+  // Read from store
+  const room    = useGameStore(s => s.room);
+  const players = useGameStore(s => s.players);
+  const me      = useGameStore(s => s.me);
+  const loading = useGameStore(s => s.loading);
+  const error   = useGameStore(s => s.error);
+  const isHost  = useGameStore(s => s.isHost);
 
   // Auto-navigate away when the room gets closed
   useEffect(() => {
@@ -157,8 +164,6 @@ function RoomWithSession({ code }) {
   if (room.status === 'playing') {
     return (
       <MultiplayerBlackjack
-        room={room} players={players} me={me} isHost={isHost}
-        gs={gs} phase={phase} isMyTurn={isMyTurn} myData={myData} canDouble={canDouble}
         onPlaceBet={placeBet} onDeal={deal}
         onHit={hit} onStand={stand} onDoubleDown={doubleDown}
         onNewRound={newRound}

@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { loadSession, saveSession } from '../../lib/session';
 import { joinRoom } from '../../lib/api';
 import { useJudgementRoom } from '../../hooks/useJudgementRoom';
+import { useGameStore } from '../../store/gameStore';
 import JudgementLobby from './JudgementLobby';
 import JudgementGame from '../games/JudgementGame';
 import '../../styles/Room.css';
@@ -90,11 +91,17 @@ function RoomWithSession({ code }) {
   const navigate = useNavigate();
 
   const {
-    room, players, me, loading, error,
-    isHost, gs, phase, isMyTurn, myData, myValidCards, forbidden,
     leaveRoom, closeRoom, startGame,
-    placeBid, playCard, startNextRound,
+    placeBid, playCard,
   } = useJudgementRoom(code);
+
+  // Read from store
+  const room    = useGameStore(s => s.room);
+  const players = useGameStore(s => s.players);
+  const me      = useGameStore(s => s.me);
+  const loading = useGameStore(s => s.loading);
+  const error   = useGameStore(s => s.error);
+  const isHost  = useGameStore(s => s.isHost);
 
   useEffect(() => {
     if (error && error.includes('closed')) {
@@ -139,11 +146,7 @@ function RoomWithSession({ code }) {
   if (room.status === 'playing') {
     return (
       <JudgementGame
-        room={room} players={players} me={me} isHost={isHost}
-        gs={gs} phase={phase} isMyTurn={isMyTurn} myData={myData}
-        myValidCards={myValidCards} forbidden={forbidden}
         onPlaceBid={placeBid} onPlayCard={playCard}
-        onNextRound={startNextRound}
         onLeave={handleLeave}
         onClose={handleClose}
       />

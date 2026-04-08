@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { handScore, isBlackjack } from '../../lib/deck';
+import { useGameStore } from '../../store/gameStore';
 import '../../styles/MultiplayerBJ.css';
 
 const CHIP_VALUES = [
@@ -11,11 +12,22 @@ const CHIP_VALUES = [
 ];
 
 export default function MultiplayerBlackjack({
-  room, players, me, isHost,
-  gs, phase, isMyTurn, myData, canDouble,
   onPlaceBet, onDeal, onHit, onStand, onDoubleDown,
   onNewRound, onLeave, onClose,
 }) {
+  // Read from store
+  const room      = useGameStore(s => s.room);
+  const players   = useGameStore(s => s.players);
+  const me        = useGameStore(s => s.me);
+  const isHost    = useGameStore(s => s.isHost);
+  const gs        = useGameStore(s => s.gs);
+  const phase     = useGameStore(s => s.phase);
+  const isMyTurn  = useGameStore(s => s.isMyTurn);
+  const myData    = useGameStore(s => s.myData);
+  const canAct    = useGameStore(s => s.canAct);
+  const canBet    = useGameStore(s => s.canBet);
+  const canDouble = useGameStore(s => s.canDouble);
+
   const [localBet, setLocalBet]  = useState(0);
   const [betLocked, setBetLocked] = useState(false);
   const [acting, setActing]      = useState(false);
@@ -36,7 +48,7 @@ export default function MultiplayerBlackjack({
 
   // ── Betting ──────────────────────────────────────────────────────────────────
   async function handlePlaceBet() {
-    if (localBet === 0 || betLocked) return;
+    if (localBet === 0 || betLocked || !canBet) return;
     setBetLocked(true);
     await onPlaceBet(localBet);
   }
@@ -70,7 +82,7 @@ export default function MultiplayerBlackjack({
         <div className="mbj-header-left">
           <span className="mbj-suit">♦</span>
           <span className="mbj-title">Blackjack</span>
-          <span className="mbj-room-code">{room.code}</span>
+          <span className="mbj-room-code">{room?.code}</span>
         </div>
         <div className="mbj-header-right">
           <span className="mbj-balance">
@@ -135,6 +147,7 @@ export default function MultiplayerBlackjack({
                   <span className="mbj-seat-name">
                     {player.name}
                     {isMe && <span className="mbj-you-tag">You</span>}
+                    {isMe && isMyTurn && <span className="mbj-your-turn-badge">YOUR TURN</span>}
                   </span>
                   <div className="mbj-seat-meta">
                     {seatData.bet > 0 && (
@@ -199,7 +212,7 @@ export default function MultiplayerBlackjack({
                       className="mbj-chip"
                       style={{ '--chip-color': chip.color }}
                       onClick={() => setLocalBet(b => Math.min(b + chip.value, myBalance))}
-                      disabled={localBet + chip.value > myBalance}
+                      disabled={!canBet || betLocked || localBet + chip.value > myBalance}
                     >
                       ${chip.value}
                     </button>
@@ -208,7 +221,7 @@ export default function MultiplayerBlackjack({
                 <button
                   className="room-btn primary full"
                   onClick={handlePlaceBet}
-                  disabled={localBet === 0}
+                  disabled={localBet === 0 || betLocked || !canBet}
                 >
                   Confirm Bet →
                 </button>
@@ -237,7 +250,7 @@ export default function MultiplayerBlackjack({
         )}
 
         {/* Playing phase — only for active player */}
-        {phase === 'playing' && isMyTurn && (
+        {canAct && (
           <div className="mbj-action-panel">
             <div className="mbj-your-turn">Your turn!</div>
             <div className="mbj-action-btns">
