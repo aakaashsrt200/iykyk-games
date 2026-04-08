@@ -811,6 +811,11 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes edge-urgent {
+  from { opacity: 1; }
+  to   { opacity: 0.5; }
+}
+
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 16px rgba(244,197,66,0.2); }
   50%       { box-shadow: 0 0 32px rgba(244,197,66,0.45); }

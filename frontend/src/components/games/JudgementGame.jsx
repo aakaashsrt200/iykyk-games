@@ -4,6 +4,7 @@ import {
   ROUND_PAUSE_MS, scoreRound,
 } from '../../lib/judgement';
 import { useGameStore } from '../../store/gameStore';
+import PageEdgeIndicator from '../PageEdgeIndicator';
 import '../../styles/Judgement.css';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -656,6 +657,8 @@ export default function JudgementGame({
 
   return (
     <div className="jdg-page">
+      <PageEdgeIndicator />
+
       {/* Top bar */}
       <div className="jdg-topbar">
         <div className="jdg-topbar-left">

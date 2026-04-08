@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { handScore, isBlackjack } from '../../lib/deck';
 import { useGameStore } from '../../store/gameStore';
+import PageEdgeIndicator from '../PageEdgeIndicator';
 import '../../styles/MultiplayerBJ.css';
 
 const CHIP_VALUES = [
@@ -76,6 +77,7 @@ export default function MultiplayerBlackjack({
 
   return (
     <div className="mbj-page">
+      <PageEdgeIndicator />
 
       {/* ── Top bar ── */}
       <header className="mbj-header">
