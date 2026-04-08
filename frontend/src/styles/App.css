@@ -816,6 +816,120 @@ body {
   to   { opacity: 0.5; }
 }
 
+/* ─── Result Overlay animations ─────────────────────────────────────────────── */
+@keyframes overlay-in {
+  0%   { transform: scale(0.72) translateY(10px); opacity: 0; }
+  65%  { transform: scale(1.04) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+
+@keyframes overlay-out {
+  0%   { transform: scale(1)    translateY(0);    opacity: 1; }
+  30%  { transform: scale(1.06) translateY(-4px); opacity: 0.8; }
+  100% { transform: scale(0.68) translateY(8px);  opacity: 0; }
+}
+
+@keyframes trick-slide-in {
+  0%   { transform: translateX(-32px) scale(0.88); opacity: 0; }
+  60%  { transform: translateX(4px) scale(1.02);   opacity: 1; }
+  100% { transform: translateX(0) scale(1);         opacity: 1; }
+}
+
+@keyframes trick-slide-out {
+  0%   { transform: translateX(0) scale(1);       opacity: 1; }
+  100% { transform: translateX(32px) scale(0.88); opacity: 0; }
+}
+
+/* ─── ResultOverlay base styles ─────────────────────────────────────────────── */
+.result-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 8000;
+  pointer-events: none;
+}
+
+.result-overlay-card {
+  pointer-events: auto;
+  padding: 24px 40px;
+  border-radius: 16px;
+  text-align: center;
+  animation: overlay-in 0.35s cubic-bezier(0.34, 1.42, 0.64, 1) both;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.4);
+  min-width: 220px;
+}
+
+.result-overlay-card.exiting {
+  animation: overlay-out 0.28s ease-in both;
+}
+
+.result-overlay-card.trick-type {
+  animation: trick-slide-in 0.3s cubic-bezier(0.34, 1.42, 0.64, 1) both;
+}
+
+.result-overlay-card.trick-type.exiting {
+  animation: trick-slide-out 0.25s ease-in both;
+}
+
+.result-overlay-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.result-overlay-sub {
+  font-size: 0.88rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.result-overlay-win {
+  background: linear-gradient(135deg, rgba(16,185,129,0.92), rgba(5,150,105,0.92));
+  border: 1px solid rgba(16,185,129,0.6);
+  color: #fff;
+}
+
+.result-overlay-blackjack {
+  background: linear-gradient(135deg, rgba(245,158,11,0.95), rgba(217,119,6,0.95));
+  border: 1px solid rgba(245,158,11,0.7);
+  color: #1a1a1a;
+  box-shadow: 0 0 32px rgba(245,158,11,0.4), 0 16px 48px rgba(0,0,0,0.6);
+}
+
+.result-overlay-lose {
+  background: linear-gradient(135deg, rgba(220,38,38,0.9), rgba(185,28,28,0.9));
+  border: 1px solid rgba(220,38,38,0.6);
+  color: #fff;
+}
+
+.result-overlay-push {
+  background: linear-gradient(135deg, rgba(99,102,241,0.88), rgba(79,70,229,0.88));
+  border: 1px solid rgba(99,102,241,0.5);
+  color: #fff;
+}
+
+.result-overlay-trick_win {
+  background: linear-gradient(135deg, rgba(16,185,129,0.92), rgba(5,150,105,0.92));
+  border: 1px solid rgba(16,185,129,0.6);
+  color: #fff;
+}
+
+.result-overlay-bid_hit {
+  background: linear-gradient(135deg, rgba(16,185,129,0.92), rgba(5,150,105,0.92));
+  border: 1px solid rgba(16,185,129,0.6);
+  color: #fff;
+}
+
+.result-overlay-bid_miss {
+  background: linear-gradient(135deg, rgba(75,85,99,0.92), rgba(55,65,81,0.92));
+  border: 1px solid rgba(107,114,128,0.5);
+  color: #e8eaf0;
+}
+
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 16px rgba(244,197,66,0.2); }
   50%       { box-shadow: 0 0 32px rgba(244,197,66,0.45); }

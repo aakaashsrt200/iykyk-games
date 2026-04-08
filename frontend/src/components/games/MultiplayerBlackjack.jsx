@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { handScore, isBlackjack } from '../../lib/deck';
 import { useGameStore } from '../../store/gameStore';
 import PageEdgeIndicator from '../PageEdgeIndicator';
+import ResultOverlay from '../ResultOverlay';
 import '../../styles/MultiplayerBJ.css';
 
 const CHIP_VALUES = [
@@ -29,9 +30,13 @@ export default function MultiplayerBlackjack({
   const canBet    = useGameStore(s => s.canBet);
   const canDouble = useGameStore(s => s.canDouble);
 
-  const [localBet, setLocalBet]  = useState(0);
+  const [localBet, setLocalBet]   = useState(0);
   const [betLocked, setBetLocked] = useState(false);
-  const [acting, setActing]      = useState(false);
+  const [acting, setActing]       = useState(false);
+  const [overlay, setOverlay]     = useState(null);
+
+  const prevPhaseRef   = useRef(null);
+  const prevOutcomeRef = useRef(null);
 
   const myBalance = players.find(p => p.id === me?.id)?.balance ?? 1000;
   const dealerHand = gs?.dealer_hand || [];
@@ -46,6 +51,40 @@ export default function MultiplayerBlackjack({
       setActing(false);
     }
   }, [phase, gs?.round]);
+
+  // Show result overlay when phase transitions to 'result'
+  useEffect(() => {
+    const prevPhase = prevPhaseRef.current;
+    if (phase === 'result' && prevPhase !== 'result' && myData) {
+      const outcome = myData.outcome;
+      if (outcome) {
+        const payout = myData.payout ?? 0;
+        const bet    = myData.bet ?? 0;
+        const netDelta = payout - bet;
+        let message, sub, type;
+        if (outcome === 'blackjack') {
+          type    = 'blackjack';
+          message = '♦ Blackjack!';
+          sub     = `+$${netDelta} (3:2)`;
+        } else if (outcome === 'win') {
+          type    = 'win';
+          message = '✓ You Win!';
+          sub     = `+$${netDelta}`;
+        } else if (outcome === 'lose' || outcome === 'bust') {
+          type    = 'lose';
+          message = outcome === 'bust' ? '✗ Bust' : '✗ You Lose';
+          sub     = `-$${bet}`;
+        } else if (outcome === 'push') {
+          type    = 'push';
+          message = '= Push';
+          sub     = null;
+        }
+        if (type) setOverlay({ type, message, sub });
+      }
+    }
+    prevPhaseRef.current = phase;
+    prevOutcomeRef.current = myData?.outcome;
+  }, [phase, myData?.outcome]);
 
   // ── Betting ──────────────────────────────────────────────────────────────────
   async function handlePlaceBet() {
@@ -191,6 +230,11 @@ export default function MultiplayerBlackjack({
       </div>
 
       {/* ── Controls ── */}
+      {/* Result overlay */}
+      {overlay && (
+        <ResultOverlay result={overlay} onDismiss={() => setOverlay(null)} />
+      )}
+
       <div className="mbj-controls">
 
         {/* Betting phase */}

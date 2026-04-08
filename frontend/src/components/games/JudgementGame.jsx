@@ -5,6 +5,7 @@ import {
 } from '../../lib/judgement';
 import { useGameStore } from '../../store/gameStore';
 import PageEdgeIndicator from '../PageEdgeIndicator';
+import ResultOverlay from '../ResultOverlay';
 import '../../styles/Judgement.css';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -232,11 +233,13 @@ export default function JudgementGame({
   const [bidInput,     setBidInput]     = useState(null);
   const [showHistory,  setShowHistory]  = useState(false);
   const [toast,        setToast]        = useState(null);
+  const [overlay,      setOverlay]      = useState(null);
 
   // Track turn changes for toast notifications
-  const prevPhaseRef     = useRef(phase);
-  const prevMyTurnRef    = useRef(isMyTurn);
-  const prevRoundIdxRef  = useRef(gs?.round_idx);
+  const prevPhaseRef        = useRef(phase);
+  const prevMyTurnRef       = useRef(isMyTurn);
+  const prevRoundIdxRef     = useRef(gs?.round_idx);
+  const prevTrickWinnerRef  = useRef(null);
 
   useEffect(() => {
     if (!gs) return;
@@ -251,13 +254,19 @@ export default function JudgementGame({
     else if (phase === 'playing' && isMyTurn && (!wasMyTurn || prevPhase !== 'playing')) {
       setToast('Your turn to play a card!');
     }
-    // "You won X pts this round!"
+    // Round result overlay
     else if (phase === 'round_result' && prevPhase === 'playing' && gs.round_history?.length) {
       const lastRound = gs.round_history[gs.round_history.length - 1];
       const mySeat    = me?.seat;
       if (mySeat != null && lastRound?.seats?.[mySeat]) {
-        const delta = scoreRound(lastRound.seats[mySeat].bid, lastRound.seats[mySeat].tricks_won);
+        const sd    = lastRound.seats[mySeat];
+        const delta = scoreRound(sd.bid, sd.tricks_won);
+        const hit   = sd.bid === sd.tricks_won;
         setToast(`You won ${delta} pts this round!`);
+        setOverlay(hit
+          ? { type: 'bid_hit',  message: 'Bid hit!',  sub: `+${delta} pts / Bid ${sd.bid}, got ${sd.tricks_won}` }
+          : { type: 'bid_miss', message: 'Missed',    sub: `+0 pts / Bid ${sd.bid}, got ${sd.tricks_won}` }
+        );
       }
     }
 
@@ -270,6 +279,21 @@ export default function JudgementGame({
   useEffect(() => {
     if (!isMyTurn || phase !== 'bidding') setBidInput(null);
   }, [isMyTurn, phase]);
+
+  // Trick win overlay for current player
+  useEffect(() => {
+    if (!gs?.trick || phase !== 'playing') return;
+    const trickWinner = gs.trick.winner;
+    const prevWinner  = prevTrickWinnerRef.current;
+    if (trickWinner != null && trickWinner !== prevWinner && trickWinner === me?.seat) {
+      const mySeat   = me?.seat;
+      const mySeatData = gs.seats?.[String(mySeat)];
+      const tricks   = mySeatData?.tricks_won ?? 0;
+      const bid      = mySeatData?.bid ?? 0;
+      setOverlay({ type: 'trick_win', message: '✨ You won the trick!', sub: `${tricks}/${bid} tricks` });
+    }
+    prevTrickWinnerRef.current = trickWinner;
+  }, [gs?.trick?.winner, phase]);
 
   if (!gs || !gs.seats) return <div className="jdg-loading">Loading game…</div>;
 
@@ -718,6 +742,11 @@ export default function JudgementGame({
 
       {/* Bottom: Always-visible hand */}
       {renderHand()}
+
+      {/* Result overlays */}
+      {overlay && (
+        <ResultOverlay result={overlay} onDismiss={() => setOverlay(null)} />
+      )}
 
       {/* Toast */}
       <Toast message={toast} onDone={() => setToast(null)} />
