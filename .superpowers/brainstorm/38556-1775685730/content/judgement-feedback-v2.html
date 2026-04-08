@@ -1,0 +1,193 @@
+<style>
+  /* ── Overlay enter/exit animations ── */
+  @keyframes overlay-in {
+    0%   { transform: scale(0.72) translateY(10px); opacity: 0; }
+    65%  { transform: scale(1.04) translateY(-2px); opacity: 1; }
+    100% { transform: scale(1)    translateY(0);    opacity: 1; }
+  }
+  @keyframes overlay-out {
+    0%   { transform: scale(1)    translateY(0);    opacity: 1; }
+    30%  { transform: scale(1.06) translateY(-4px); opacity: 0.8; }
+    100% { transform: scale(0.68) translateY(8px);  opacity: 0; }
+  }
+  @keyframes trick-in {
+    0%   { transform: translateX(-32px) scale(0.88); opacity: 0; }
+    60%  { transform: translateX(4px)  scale(1.02); opacity: 1; }
+    100% { transform: translateX(0)    scale(1);    opacity: 1; }
+  }
+  @keyframes trick-out {
+    0%   { transform: translateX(0)   scale(1);    opacity: 1; }
+    100% { transform: translateX(32px) scale(0.88); opacity: 0; }
+  }
+  @keyframes gameover-in {
+    0%   { transform: scale(0.6) rotate(-2deg); opacity: 0; }
+    55%  { transform: scale(1.05) rotate(0.5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .overlay-enter { animation: overlay-in  0.38s cubic-bezier(0.34,1.42,0.64,1) both; }
+  .overlay-exit  { animation: overlay-out 0.3s  cubic-bezier(0.55,0,1,0.45) both; }
+  .trick-enter   { animation: trick-in    0.32s cubic-bezier(0.34,1.42,0.64,1) both; }
+  .trick-exit    { animation: trick-out   0.25s cubic-bezier(0.55,0,1,0.45) both; }
+  .gameover-enter{ animation: gameover-in 0.48s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+  /* ── Overlay styles ── */
+  .jdg-overlay { border-radius: 14px; padding: 18px 22px; margin-bottom: 10px; }
+
+  .jdg-trick-win {
+    background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.35);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .trick-icon { font-size: 1.5rem; }
+  .trick-text h4 { margin: 0 0 2px; font-size: 0.95rem; color: #34d399; font-weight: 800; }
+  .trick-text p  { margin: 0; font-size: 0.78rem; color: rgba(52,211,153,0.65); }
+
+  .jdg-personal-result {
+    text-align: center; padding: 18px 24px; border-radius: 14px;
+  }
+  .hit-bid  { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); }
+  .miss-bid { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.2); }
+
+  .jdg-round-result {
+    background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.28);
+  }
+  .round-title { font-size: 1.05rem; font-weight: 800; color: #e8eaf0; margin: 0 0 12px; text-align: center; }
+  .score-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
+  .score-row:last-child { border-bottom: none; }
+  .score-name { color: #9ca3af; } .score-name.me { color: #a78bfa; font-weight: 700; }
+  .score-delta.hit { color: #10b981; font-weight: 800; } .score-delta.miss { color: #6b7280; }
+  .score-total { color: #a78bfa; font-weight: 700; min-width: 52px; text-align: right; }
+
+  .jdg-game-over {
+    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(124,58,237,0.04));
+    border: 1px solid rgba(124,58,237,0.35); border-radius: 14px; padding: 24px; text-align: center;
+  }
+  .final-row { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 8px; margin-bottom: 6px; }
+  .final-row.gold { background: rgba(244,197,66,0.1); border: 1px solid rgba(244,197,66,0.25); }
+  .final-rank { font-size: 1.1rem; min-width: 26px; }
+  .final-pname { flex:1; color: #e8eaf0; font-weight: 600; font-size: 0.84rem; }
+  .final-pts { color: #a78bfa; font-weight: 800; font-size: 0.86rem; }
+
+  /* Blackjack overlays */
+  .bj-result { border-radius: 14px; padding: 18px 28px; text-align: center; }
+  .bj-win  { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.35);  color: #4ade80; }
+  .bj-lose { background: rgba(230,57,70,0.1);  border: 1px solid rgba(230,57,70,0.35);  color: #f87171; }
+  .bj-bj   { background: linear-gradient(135deg,rgba(244,197,66,0.15),rgba(244,197,66,0.05)); border: 1px solid rgba(244,197,66,0.5); color: #f4c542; box-shadow: 0 0 28px rgba(244,197,66,0.15); }
+  .bj-push { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);  color: #a5b4fc; }
+  .result-title { font-size: 1.3rem; font-weight: 800; letter-spacing: 0.03em; margin: 0 0 4px; }
+  .result-sub   { font-size: 0.82rem; opacity: 0.7; margin: 0; }
+
+  /* Controls */
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .demo-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #9ca3af; border-radius: 8px; padding: 6px 14px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.15s; }
+  .demo-btn:hover { background: rgba(255,255,255,0.1); color: #e8eaf0; }
+  .section-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); font-weight: 700; margin: 20px 0 8px; }
+  .slot { min-height: 90px; }
+</style>
+
+<h2>Result Overlays — Animated Enter & Exit</h2>
+<p class="subtitle">Zoom-in on appear · zoom-out on dismiss · each overlay type has its own motion character.</p>
+
+<div class="section-label">Blackjack</div>
+<div class="demo-controls">
+  <button class="demo-btn" onclick="showBJ('win')">Win</button>
+  <button class="demo-btn" onclick="showBJ('blackjack')">Blackjack!</button>
+  <button class="demo-btn" onclick="showBJ('lose')">Lose</button>
+  <button class="demo-btn" onclick="showBJ('push')">Push</button>
+</div>
+<div class="slot" id="bj-slot"></div>
+
+<div class="section-label">Judgement</div>
+<div class="demo-controls">
+  <button class="demo-btn" onclick="showJdg('trick')">Trick Won</button>
+  <button class="demo-btn" onclick="showJdg('hit')">Round — Hit Bid</button>
+  <button class="demo-btn" onclick="showJdg('miss')">Round — Missed</button>
+  <button class="demo-btn" onclick="showJdg('round')">Round Scoreboard</button>
+  <button class="demo-btn" onclick="showJdg('gameover')">Game Over</button>
+</div>
+<div class="slot" id="jdg-slot"></div>
+
+<script>
+function animateOut(el, cls, cb) {
+  el.classList.remove(...el.classList);
+  el.classList.add(cls);
+  el.addEventListener('animationend', cb, { once: true });
+}
+
+function showWithAutoExit(slotId, innerHtml, enterCls, exitCls, delay) {
+  const slot = document.getElementById(slotId);
+  // If something's already there, exit it first
+  const existing = slot.firstElementChild;
+  if (existing) {
+    animateOut(existing, exitCls, () => {
+      slot.innerHTML = innerHtml;
+      if (delay) scheduleExit(slot, exitCls, delay);
+    });
+  } else {
+    slot.innerHTML = innerHtml;
+    if (delay) scheduleExit(slot, exitCls, delay);
+  }
+}
+
+function scheduleExit(slot, exitCls, delay) {
+  setTimeout(() => {
+    const el = slot.firstElementChild;
+    if (!el) return;
+    animateOut(el, exitCls, () => { slot.innerHTML = '<div style="min-height:90px"></div>'; });
+  }, delay);
+}
+
+function showBJ(type) {
+  const map = {
+    win:       ['<div class="bj-result bj-win overlay-enter"><p class="result-title">✓ You Win!</p><p class="result-sub">+$50</p></div>',       'overlay-enter','overlay-exit',2200],
+    blackjack: ['<div class="bj-result bj-bj overlay-enter"><p class="result-title">♦ Blackjack!</p><p class="result-sub">+$75 (3:2)</p></div>','overlay-enter','overlay-exit',2500],
+    lose:      ['<div class="bj-result bj-lose overlay-enter"><p class="result-title">✗ You Lose</p><p class="result-sub">−$25</p></div>',       'overlay-enter','overlay-exit',2200],
+    push:      ['<div class="bj-result bj-push overlay-enter"><p class="result-title">= Push</p><p class="result-sub">Bet returned</p></div>',   'overlay-enter','overlay-exit',2200],
+  };
+  showWithAutoExit('bj-slot', ...map[type]);
+}
+
+function showJdg(type) {
+  const map = {
+    trick: [`
+      <div class="jdg-overlay jdg-trick-win trick-enter">
+        <div class="trick-icon">✨</div>
+        <div class="trick-text"><h4>You won the trick!</h4><p>2/2 tricks — bid was 2</p></div>
+      </div>`, 'trick-enter','trick-exit',2200],
+
+    hit: [`
+      <div class="jdg-personal-result hit-bid overlay-enter">
+        <div style="font-size:2rem;margin-bottom:6px">🎯</div>
+        <div style="font-size:1.15rem;font-weight:900;color:#34d399;margin-bottom:4px">Bid hit! +20 pts</div>
+        <div style="font-size:0.78rem;color:rgba(52,211,153,0.65)">Bid 2, got 2</div>
+      </div>`, 'overlay-enter','overlay-exit',2400],
+
+    miss: [`
+      <div class="jdg-personal-result miss-bid overlay-enter">
+        <div style="font-size:2rem;margin-bottom:6px">😬</div>
+        <div style="font-size:1.15rem;font-weight:900;color:#9ca3af;margin-bottom:4px">Missed — +0 pts</div>
+        <div style="font-size:0.78rem;color:#6b7280">Bid 3, got 1</div>
+      </div>`, 'overlay-enter','overlay-exit',2400],
+
+    round: [`
+      <div class="jdg-overlay jdg-round-result overlay-enter">
+        <div class="round-title">Round 3 Complete</div>
+        <div class="score-row"><span class="score-name me">You</span><span style="color:#6b7280;font-size:0.75rem">Bid 2, got 2</span><span class="score-delta hit">+20</span><span class="score-total">80 pts</span></div>
+        <div class="score-row"><span class="score-name">Alice</span><span style="color:#6b7280;font-size:0.75rem">Bid 1, got 3</span><span class="score-delta miss">+0</span><span class="score-total">60 pts</span></div>
+        <div class="score-row"><span class="score-name">Bob</span><span style="color:#6b7280;font-size:0.75rem">Bid 0, got 0</span><span class="score-delta hit">+10</span><span class="score-total">70 pts</span></div>
+        <div style="margin-top:10px;font-size:0.74rem;color:#6b7280;text-align:center">Next round in <strong style="color:#a78bfa">3s</strong></div>
+      </div>`, 'overlay-enter','overlay-exit', null],
+
+    gameover: [`
+      <div class="jdg-game-over gameover-enter">
+        <div style="font-size:2.2rem;margin-bottom:4px">🏆</div>
+        <div style="font-size:1.4rem;font-weight:900;color:#e8eaf0;margin-bottom:2px">You win!</div>
+        <div style="color:#a78bfa;font-size:0.84rem;margin-bottom:16px">Final standings</div>
+        <div class="final-row gold"><span class="final-rank">🥇</span><span class="final-pname">You</span><span class="final-pts">80 pts</span></div>
+        <div class="final-row"><span class="final-rank">🥈</span><span class="final-pname">Bob</span><span class="final-pts">70 pts</span></div>
+        <div class="final-row"><span class="final-rank">🥉</span><span class="final-pname">Alice</span><span class="final-pts">60 pts</span></div>
+      </div>`, 'gameover-enter','overlay-exit', null],
+  };
+  showWithAutoExit('jdg-slot', ...map[type]);
+}
+</script>

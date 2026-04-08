@@ -1,0 +1,112 @@
+<h2>Card Visual Style</h2>
+<p class="subtitle">How should the playing cards look? Each option affects both Blackjack and Judgement.</p>
+
+<div class="cards">
+
+  <!-- Option A: Enhanced CSS cards (current approach, bigger + premium) -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f2d1a; display:flex; gap:10px; justify-content:center; padding:20px; border-radius:8px;">
+      <!-- Sample hand -->
+      <div style="width:68px;height:100px;border-radius:8px;background:#fff;color:#c0171f;box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 0 0 1px rgba(0,0,0,0.08);position:relative;flex-shrink:0;">
+        <div style="position:absolute;top:5px;left:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;line-height:1;">A</div>
+        <div style="position:absolute;top:18px;left:7px;font-size:0.7rem;">♥</div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.2rem;text-shadow:0 2px 4px rgba(0,0,0,0.1);">♥</div>
+        <div style="position:absolute;bottom:5px;right:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;transform:rotate(180deg);line-height:1;">A</div>
+        <!-- Shine effect -->
+        <div style="position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.18),transparent);border-radius:8px 8px 0 0;"></div>
+      </div>
+      <div style="width:68px;height:100px;border-radius:8px;background:#fff;color:#1a1a1a;box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 0 0 1px rgba(0,0,0,0.08);position:relative;flex-shrink:0;">
+        <div style="position:absolute;top:5px;left:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;line-height:1;">K</div>
+        <div style="position:absolute;top:18px;left:7px;font-size:0.7rem;">♠</div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.2rem;">♠</div>
+        <div style="position:absolute;bottom:5px;right:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;transform:rotate(180deg);line-height:1;">K</div>
+        <div style="position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.18),transparent);border-radius:8px 8px 0 0;"></div>
+      </div>
+      <div style="width:68px;height:100px;border-radius:8px;background:#fff;color:#c0171f;box-shadow:0 6px 20px rgba(0,0,0,0.6),inset 0 0 0 1px rgba(0,0,0,0.08);position:relative;flex-shrink:0;">
+        <div style="position:absolute;top:5px;left:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;line-height:1;">Q</div>
+        <div style="position:absolute;top:18px;left:7px;font-size:0.7rem;">♦</div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.2rem;">♦</div>
+        <div style="position:absolute;bottom:5px;right:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;transform:rotate(180deg);line-height:1;">Q</div>
+        <div style="position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.18),transparent);border-radius:8px 8px 0 0;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Premium CSS Cards</h3>
+      <p>Larger cards with shine/depth effects. Face cards styled with bold typography and a subtle inner glow. No new assets — pure CSS. Clean, fast, consistent.</p>
+      <ul style="font-size:0.82rem;color:#9ca3af;margin:8px 0 0;padding-left:16px;">
+        <li>No external dependencies</li>
+        <li>Fully customisable colours & animations</li>
+        <li>K/Q/J shown as styled text (no artwork)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option B: SVG deck library (real artwork on face cards) -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f2d1a; display:flex; gap:10px; justify-content:center; padding:20px; border-radius:8px;">
+      <div style="width:68px;height:100px;border-radius:8px;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;flex-shrink:0;overflow:hidden;">
+        <div style="position:absolute;top:4px;left:6px;font-size:0.9rem;font-weight:900;font-family:Georgia,serif;color:#c0171f;">A</div>
+        <div style="font-size:2.4rem;color:#c0171f;line-height:1;">♥</div>
+        <div style="position:absolute;top:0;left:0;right:0;height:35%;background:linear-gradient(180deg,rgba(255,255,255,0.2),transparent);"></div>
+      </div>
+      <div style="width:68px;height:100px;border-radius:8px;background:linear-gradient(145deg,#fff8f0,#fff);box-shadow:0 6px 20px rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;flex-shrink:0;overflow:hidden;border:1px solid #e8d5b0;">
+        <div style="position:absolute;top:4px;left:6px;font-size:0.9rem;font-weight:900;font-family:Georgia,serif;color:#1a1a1a;">K</div>
+        <!-- King artwork simulation -->
+        <div style="font-size:1.4rem;line-height:1;text-align:center;">👑<br><span style="font-size:0.9rem;">♠</span></div>
+        <div style="position:absolute;top:0;left:0;right:0;height:35%;background:linear-gradient(180deg,rgba(255,255,255,0.25),transparent);"></div>
+      </div>
+      <div style="width:68px;height:100px;border-radius:8px;background:linear-gradient(145deg,#fff8f0,#fff);box-shadow:0 6px 20px rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;flex-shrink:0;overflow:hidden;border:1px solid #e8d5b0;">
+        <div style="position:absolute;top:4px;left:6px;font-size:0.9rem;font-weight:900;font-family:Georgia,serif;color:#c0171f;">Q</div>
+        <div style="font-size:1.4rem;line-height:1;text-align:center;">💎<br><span style="font-size:0.9rem;color:#c0171f;">♦</span></div>
+        <div style="position:absolute;top:0;left:0;right:0;height:35%;background:linear-gradient(180deg,rgba(255,255,255,0.25),transparent);"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — SVG Face Card Artwork</h3>
+      <p>Real illustrated artwork for K, Q, J using an open-source SVG card deck (e.g. <strong>svg-cards</strong> or similar). Number cards stay CSS; face cards get illustrations.</p>
+      <ul style="font-size:0.82rem;color:#9ca3af;margin:8px 0 0;padding-left:16px;">
+        <li>Authentic casino-style face cards</li>
+        <li>~500KB asset bundle (SVGs, loadable on demand)</li>
+        <li>More visual richness on K/Q/J</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Option C: Hybrid — premium CSS + gold/coloured face card backgrounds -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f2d1a; display:flex; gap:10px; justify-content:center; padding:20px; border-radius:8px;">
+      <div style="width:68px;height:100px;border-radius:8px;background:#fff;color:#c0171f;box-shadow:0 6px 20px rgba(0,0,0,0.6),0 0 0 1px rgba(0,0,0,0.08);position:relative;flex-shrink:0;overflow:hidden;">
+        <div style="position:absolute;top:5px;left:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;line-height:1;">A</div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.4rem;filter:drop-shadow(0 2px 6px rgba(192,23,31,0.4));">♥</div>
+        <div style="position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.2),transparent);"></div>
+      </div>
+      <!-- King with coloured background band -->
+      <div style="width:68px;height:100px;border-radius:8px;background:#fff;color:#1a1a1a;box-shadow:0 6px 20px rgba(0,0,0,0.6),0 0 0 1px rgba(0,0,0,0.08);position:relative;flex-shrink:0;overflow:hidden;">
+        <div style="position:absolute;top:5px;left:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;line-height:1;">K</div>
+        <!-- Gold band behind center -->
+        <div style="position:absolute;top:25%;left:0;right:0;bottom:25%;background:linear-gradient(135deg,rgba(244,197,66,0.15),rgba(244,197,66,0.05));"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.8rem;filter:drop-shadow(0 1px 4px rgba(0,0,0,0.2));">♔</div>
+        <div style="position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.2),transparent);"></div>
+      </div>
+      <!-- Queen with pink band -->
+      <div style="width:68px;height:100px;border-radius:8px;background:#fff;color:#c0171f;box-shadow:0 6px 20px rgba(0,0,0,0.6),0 0 0 1px rgba(0,0,0,0.08);position:relative;flex-shrink:0;overflow:hidden;">
+        <div style="position:absolute;top:5px;left:7px;font-size:1rem;font-weight:900;font-family:Georgia,serif;line-height:1;">Q</div>
+        <div style="position:absolute;top:25%;left:0;right:0;bottom:25%;background:linear-gradient(135deg,rgba(192,23,31,0.08),rgba(192,23,31,0.02));"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.8rem;filter:drop-shadow(0 1px 4px rgba(192,23,31,0.3));">♛</div>
+        <div style="position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.2),transparent);"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Premium CSS + Unicode Royals</h3>
+      <p>Everything in Option A, but face cards use large Unicode chess/crown symbols (♔♛♞) with subtle coloured backgrounds to distinguish them visually. No new assets, more personality than plain text.</p>
+      <ul style="font-size:0.82rem;color:#9ca3af;margin:8px 0 0;padding-left:16px;">
+        <li>No external assets or dependencies</li>
+        <li>K/Q/J have clear visual identity</li>
+        <li>Works instantly, zero load time</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">All options include: larger card size (~80×115px), shine/depth effects, and dealing animation.</p>

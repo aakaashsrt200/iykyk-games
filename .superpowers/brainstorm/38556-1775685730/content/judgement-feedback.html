@@ -1,0 +1,226 @@
+<style>
+  /* ── Corrected card (no symbols, large suit center) ── */
+  .card {
+    width: 88px; height: 126px;
+    border-radius: 10px; position: relative; flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.65), 0 2px 6px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.08);
+    background: #fff; overflow: hidden;
+    animation: deal-in calc(0.32s + var(--i,0) * 0.12s) cubic-bezier(0.34,1.42,0.64,1) both;
+    animation-delay: calc(var(--i,0) * 0.13s);
+  }
+  .card.red { color: #c0171f; }
+  .card.black { color: #111827; }
+  .card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.06) 40%, transparent 60%);
+    border-radius: 10px; pointer-events: none; z-index: 3;
+  }
+  .card::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12);
+    pointer-events: none; z-index: 4;
+  }
+  .card-tl { position: absolute; top: 6px; left: 8px; display: flex; flex-direction: column; align-items: center; gap: 0; line-height: 1; z-index: 2; }
+  .card-br { position: absolute; bottom: 6px; right: 8px; display: flex; flex-direction: column; align-items: center; gap: 0; line-height: 1; transform: rotate(180deg); z-index: 2; }
+  .card-rank { font-size: 1.15rem; font-weight: 900; font-family: Georgia, serif; line-height: 1; }
+  .card-suit-sm { font-size: 0.75rem; line-height: 1.2; }
+  /* Large suit center — bigger, no icon */
+  .card-center-suit { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 2.8rem; line-height: 1; z-index: 2; user-select: none; }
+
+  @keyframes deal-in {
+    0%   { transform: translateX(-90px) translateY(-50px) rotate(-10deg) scale(0.65); opacity: 0; }
+    55%  { opacity: 1; }
+    75%  { transform: translateX(3px) translateY(-2px) rotate(0.4deg) scale(1.03); }
+    100% { transform: translateX(0) translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  }
+
+  .hand { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .demo-table {
+    background: radial-gradient(ellipse at 50% 30%, #1b4a2a 0%, #0f2d1a 60%, #091f11 100%);
+    border-radius: 16px; padding: 20px; margin-bottom: 20px;
+    border: 2px solid rgba(34,197,94,0.15);
+  }
+  .demo-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.14em; color: rgba(255,255,255,0.3); font-weight: 700; margin: 0 0 10px; }
+
+  /* ── Judgement result overlays ── */
+  .jdg-overlay {
+    border-radius: 14px; padding: 20px 24px;
+    margin-bottom: 12px;
+    animation: slide-in 0.35s cubic-bezier(0.34,1.42,0.64,1) both;
+  }
+  @keyframes slide-in {
+    from { transform: translateY(-24px) scale(0.9); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  /* Trick won */
+  .jdg-trick-win {
+    background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.35);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .trick-icon { font-size: 1.5rem; }
+  .trick-text h4 { margin: 0 0 2px; font-size: 0.95rem; color: #34d399; font-weight: 800; }
+  .trick-text p  { margin: 0; font-size: 0.78rem; color: rgba(52,211,153,0.7); }
+
+  /* Round result */
+  .jdg-round-result {
+    background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.3);
+  }
+  .round-title { font-size: 1.1rem; font-weight: 800; color: #e8eaf0; margin: 0 0 12px; text-align: center; }
+  .score-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.82rem; }
+  .score-row:last-child { border-bottom: none; }
+  .score-name { color: #9ca3af; }
+  .score-name.me { color: #a78bfa; font-weight: 700; }
+  .score-delta.hit  { color: #10b981; font-weight: 800; }
+  .score-delta.miss { color: #6b7280; }
+  .score-total { color: #a78bfa; font-weight: 700; min-width: 52px; text-align: right; }
+
+  /* Your round result (personal) */
+  .jdg-personal-result {
+    text-align: center; padding: 16px 24px;
+    animation: pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes pop-in {
+    from { transform: scale(0.7); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  .jdg-personal-result.hit-bid {
+    background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 14px;
+  }
+  .jdg-personal-result.miss-bid {
+    background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.2);
+    border-radius: 14px;
+  }
+
+  /* Game over */
+  .jdg-game-over {
+    background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(124,58,237,0.04));
+    border: 1px solid rgba(124,58,237,0.35); border-radius: 14px; padding: 24px;
+    text-align: center;
+    animation: slide-in 0.4s cubic-bezier(0.34,1.42,0.64,1) both;
+  }
+  .winner-name { font-size: 1.4rem; font-weight: 900; color: #e8eaf0; margin: 8px 0 4px; }
+  .winner-sub  { color: #a78bfa; font-size: 0.85rem; margin: 0 0 16px; }
+  .final-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; }
+  .final-row.gold { background: rgba(244,197,66,0.1); border: 1px solid rgba(244,197,66,0.25); }
+  .final-rank { font-size: 1.1rem; min-width: 28px; }
+  .final-pname { flex:1; color: #e8eaf0; font-weight: 600; font-size: 0.85rem; }
+  .final-pts { color: #a78bfa; font-weight: 800; font-size: 0.88rem; }
+
+  /* Controls */
+  .demo-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .demo-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #9ca3af; border-radius: 8px; padding: 6px 14px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.15s; }
+  .demo-btn:hover { background: rgba(255,255,255,0.1); color: #e8eaf0; }
+  .section-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); font-weight: 700; margin: 16px 0 8px; }
+  .replay-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: #9ca3af; border-radius: 8px; padding: 5px 14px; font-size: 0.75rem; cursor: pointer; font-weight: 600; margin-bottom: 14px; }
+</style>
+
+<h2>Cards (revised) + Judgement Feedback</h2>
+<p class="subtitle">Top: corrected card design — large suit center, no icons. Bottom: Judgement-specific result overlays.</p>
+
+<!-- Corrected card preview -->
+<div class="section-label">Revised Card Design — Large Suit, No Icons</div>
+<button class="replay-btn" onclick="replay()">↺ Replay Deal</button>
+<div class="demo-table" id="card-demo">
+  <div class="demo-label">Your Hand</div>
+  <div class="hand">
+    <div class="card red" style="--i:0">
+      <div class="card-tl"><span class="card-rank">A</span><span class="card-suit-sm">♥</span></div>
+      <div class="card-center-suit">♥</div>
+      <div class="card-br"><span class="card-rank">A</span><span class="card-suit-sm">♥</span></div>
+    </div>
+    <div class="card black" style="--i:1">
+      <div class="card-tl"><span class="card-rank">K</span><span class="card-suit-sm">♠</span></div>
+      <div class="card-center-suit">♠</div>
+      <div class="card-br"><span class="card-rank">K</span><span class="card-suit-sm">♠</span></div>
+    </div>
+    <div class="card red" style="--i:2">
+      <div class="card-tl"><span class="card-rank">Q</span><span class="card-suit-sm">♦</span></div>
+      <div class="card-center-suit">♦</div>
+      <div class="card-br"><span class="card-rank">Q</span><span class="card-suit-sm">♦</span></div>
+    </div>
+    <div class="card black" style="--i:3">
+      <div class="card-tl"><span class="card-rank">7</span><span class="card-suit-sm">♣</span></div>
+      <div class="card-center-suit">♣</div>
+      <div class="card-br"><span class="card-rank">7</span><span class="card-suit-sm">♣</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Judgement feedback -->
+<div class="section-label">Judgement — Result Overlays</div>
+<div class="demo-controls">
+  <button class="demo-btn" onclick="showJdg('trick')">Trick Won</button>
+  <button class="demo-btn" onclick="showJdg('personal-hit')">Round — Hit Bid</button>
+  <button class="demo-btn" onclick="showJdg('personal-miss')">Round — Missed Bid</button>
+  <button class="demo-btn" onclick="showJdg('round')">Round Scoreboard</button>
+  <button class="demo-btn" onclick="showJdg('gameover')">Game Over</button>
+</div>
+<div id="jdg-slot" style="min-height:100px;"></div>
+
+<script>
+function replay() {
+  document.querySelectorAll('.card').forEach(c => { c.style.animation='none'; c.offsetHeight; c.style.animation=''; });
+}
+
+let jTimer = null;
+function showJdg(type) {
+  const slot = document.getElementById('jdg-slot');
+  if (jTimer) clearTimeout(jTimer);
+
+  const html = {
+    trick: `
+      <div class="jdg-overlay jdg-trick-win">
+        <div class="trick-icon">✨</div>
+        <div class="trick-text">
+          <h4>You won the trick!</h4>
+          <p>1/2 tricks — bid was 2</p>
+        </div>
+      </div>`,
+
+    'personal-hit': `
+      <div class="jdg-personal-result hit-bid">
+        <div style="font-size:2rem;margin-bottom:6px;">🎯</div>
+        <div style="font-size:1.2rem;font-weight:900;color:#34d399;margin-bottom:4px;">Bid hit! +20 pts</div>
+        <div style="font-size:0.8rem;color:rgba(52,211,153,0.7);">Bid 2, got 2</div>
+      </div>`,
+
+    'personal-miss': `
+      <div class="jdg-personal-result miss-bid">
+        <div style="font-size:2rem;margin-bottom:6px;">😬</div>
+        <div style="font-size:1.2rem;font-weight:900;color:#9ca3af;margin-bottom:4px;">Bid missed — +0 pts</div>
+        <div style="font-size:0.8rem;color:#6b7280;">Bid 3, got 1</div>
+      </div>`,
+
+    round: `
+      <div class="jdg-overlay jdg-round-result">
+        <div class="round-title">Round 3 Complete</div>
+        <div class="score-row"><span class="score-name me">You</span><span style="color:#6b7280;font-size:0.78rem;">Bid 2, got 2</span><span class="score-delta hit">+20</span><span class="score-total">80 pts</span></div>
+        <div class="score-row"><span class="score-name">Alice</span><span style="color:#6b7280;font-size:0.78rem;">Bid 1, got 3</span><span class="score-delta miss">+0</span><span class="score-total">60 pts</span></div>
+        <div class="score-row"><span class="score-name">Bob</span><span style="color:#6b7280;font-size:0.78rem;">Bid 0, got 0</span><span class="score-delta hit">+10</span><span class="score-total">70 pts</span></div>
+        <div style="margin-top:12px;font-size:0.76rem;color:#6b7280;text-align:center;">Next round in <strong style="color:#a78bfa">3s</strong></div>
+      </div>`,
+
+    gameover: `
+      <div class="jdg-game-over">
+        <div style="font-size:2.2rem;margin-bottom:4px;">🏆</div>
+        <div class="winner-name">You win!</div>
+        <div class="winner-sub">Final standings</div>
+        <div class="final-row gold"><span class="final-rank">🥇</span><span class="final-pname">You</span><span class="final-pts">80 pts</span></div>
+        <div class="final-row"><span class="final-rank">🥈</span><span class="final-pname">Bob</span><span class="final-pts">70 pts</span></div>
+        <div class="final-row"><span class="final-rank">🥉</span><span class="final-pname">Alice</span><span class="final-pts">60 pts</span></div>
+      </div>`,
+  }[type];
+
+  slot.innerHTML = html;
+
+  if (type !== 'round' && type !== 'gameover') {
+    jTimer = setTimeout(() => {
+      const el = slot.querySelector('.jdg-overlay, .jdg-personal-result');
+      if (el) { el.style.transition='opacity 0.4s'; el.style.opacity='0'; }
+      setTimeout(() => { slot.innerHTML = '<div style="min-height:100px"></div>'; }, 400);
+    }, 2500);
+  }
+}
+</script>

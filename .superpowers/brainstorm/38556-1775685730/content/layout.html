@@ -1,0 +1,215 @@
+<style>
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  @media(max-width:700px) { .split { grid-template-columns: 1fr; } }
+
+  .mockup { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+  .mockup-header { background: rgba(255,255,255,0.06); padding: 8px 14px; font-size: 0.7rem; color: #6b7280; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .mockup-body { padding: 0; }
+
+  /* ── Blackjack layouts ── */
+  .bj-before {
+    background: #0d1117; padding: 12px;
+    display: flex; flex-direction: column; gap: 8px; min-height: 320px;
+  }
+  .bj-after {
+    background: #0d1117; padding: 0;
+    display: flex; flex-direction: column; min-height: 320px;
+  }
+
+  /* Before: small table, lots of wasted space */
+  .bj-before-table {
+    background: radial-gradient(ellipse at 50% 40%, #1b4a2a 0%, #0f2d1a 100%);
+    border: 1px solid rgba(34,197,94,0.12); border-radius: 12px;
+    padding: 14px; max-width: 300px; margin: 0 auto;
+  }
+  .mini-hand { display: flex; gap: 4px; min-height: 48px; align-items: center; }
+  .mini-card { width: 28px; height: 40px; background: #fff; border-radius: 3px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+  .mini-card.red { background: #fff; border-top: 3px solid #c0171f; }
+  .mini-card.black { background: #fff; border-top: 3px solid #111; }
+  .mini-card.hidden { background: linear-gradient(135deg,#1a1a6e,#0d0d4a); border-top: none; }
+  .bj-before-seats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .mini-seat { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 6px 8px; }
+  .mini-label { font-size: 0.55rem; color: #6b7280; margin-bottom: 4px; font-weight: 600; }
+  .empty-space { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .empty-label { font-size: 0.62rem; color: rgba(255,255,255,0.1); text-transform: uppercase; letter-spacing: 0.1em; border: 1px dashed rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 16px; }
+
+  /* After: full-bleed table, seats inside table zone */
+  .bj-after-table {
+    flex: 1;
+    background: radial-gradient(ellipse at 50% 25%, #1b4a2a 0%, #0f2d1a 55%, #091f11 100%);
+    border-bottom: 2px solid rgba(34,197,94,0.1);
+    padding: 14px 12px 10px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .bj-after-seats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .bj-after-controls { background: rgba(0,0,0,0.25); padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.04); }
+
+  /* ── Judgement layouts ── */
+  .jdg-before {
+    background: #0d1117; padding: 10px; min-height: 320px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .jdg-after {
+    background: #0d1117; min-height: 320px;
+    display: flex; flex-direction: column;
+  }
+
+  /* Before: narrow player panel, cramped trick area */
+  .jdg-before-layout { display: flex; gap: 8px; flex: 1; }
+  .jdg-before-panel { width: 80px; display: flex; flex-direction: column; gap: 4px; }
+  .jdg-before-player { background: rgba(255,255,255,0.04); border-radius: 4px; padding: 5px 6px; }
+  .jdg-before-main { flex: 1; background: rgba(255,255,255,0.02); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .jdg-before-trick { display: flex; gap: 5px; justify-content: center; }
+  .jdg-trick-card { width: 24px; height: 34px; background: #fff; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+  .jdg-before-hand { display: flex; gap: 3px; margin-top: 'auto'; }
+  .jdg-hand-card { width: 20px; height: 28px; background: #fff; border-radius: 2px; }
+
+  /* After: wider panel, larger trick zone, immersive hand area */
+  .jdg-after-topbar { background: rgba(0,0,0,0.4); padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 8px; font-size: 0.62rem; color: #6b7280; flex-shrink: 0; }
+  .jdg-after-body { flex: 1; display: flex; gap: 0; overflow: hidden; }
+  .jdg-after-panel { width: 110px; border-right: 1px solid rgba(255,255,255,0.05); padding: 8px 6px; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+  .jdg-after-player { background: rgba(255,255,255,0.03); border-radius: 6px; padding: 7px 8px; border: 1px solid rgba(255,255,255,0.05); }
+  .jdg-after-player.active { border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.07); }
+  .jdg-after-main { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .jdg-trick-zone { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px; display: flex; gap: 8px; justify-content: center; align-items: center; min-height: 80px; }
+  .jdg-trick-card-lg { width: 32px; height: 46px; background: #fff; border-radius: 4px; box-shadow: 0 3px 10px rgba(0,0,0,0.5); }
+  .jdg-status-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .jdg-badge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 2px 8px; font-size: 0.58rem; color: #9ca3af; font-weight: 700; }
+  .jdg-after-hand { background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); padding: 8px 12px; display: flex; gap: 5px; justify-content: center; flex-shrink: 0; }
+  .jdg-hand-card-lg { width: 28px; height: 40px; background: #fff; border-radius: 3px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  .jdg-hand-card-lg.valid { background: #fff; box-shadow: 0 0 8px rgba(167,139,250,0.6), 0 2px 8px rgba(0,0,0,0.4); transform: translateY(-4px); }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(167,139,250,0.6); display: inline-block; margin-right: 4px; }
+
+  .section-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); font-weight: 700; margin: 0 0 10px; }
+  .change-tag { display: inline-block; background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); border-radius: 20px; font-size: 0.62rem; padding: 1px 8px; font-weight: 700; margin-left: 6px; }
+</style>
+
+<h2>Layout Optimisation</h2>
+<p class="subtitle">Before vs After for both games. Key changes highlighted.</p>
+
+<!-- Blackjack -->
+<div class="section-label">Blackjack <span class="change-tag">full-bleed table · seats inside green zone · controls flush to bottom</span></div>
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Before</div>
+    <div class="mockup-body">
+      <div class="bj-before">
+        <div class="bj-before-table">
+          <div class="mini-label" style="font-size:0.55rem;color:rgba(255,255,255,0.25);margin-bottom:6px">DEALER</div>
+          <div class="mini-hand">
+            <div class="mini-card red"></div>
+            <div class="mini-card hidden"></div>
+          </div>
+          <div class="bj-before-seats">
+            <div class="mini-seat"><div class="mini-label">Alice</div><div class="mini-hand" style="min-height:30px"><div class="mini-card black"></div><div class="mini-card red"></div></div></div>
+            <div class="mini-seat"><div class="mini-label">You</div><div class="mini-hand" style="min-height:30px"><div class="mini-card red"></div><div class="mini-card black"></div></div></div>
+          </div>
+        </div>
+        <div class="empty-space"><div class="empty-label">unused space</div></div>
+        <div style="background:rgba(0,0,0,0.2);padding:8px;border-radius:6px;"><div class="mini-label">Controls</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">After</div>
+    <div class="mockup-body">
+      <div class="bj-after">
+        <div class="bj-after-table">
+          <div class="mini-label" style="margin-bottom:4px">DEALER</div>
+          <div class="mini-hand">
+            <div class="mini-card red"></div><div class="mini-card hidden"></div>
+          </div>
+          <div style="text-align:center;font-size:0.5rem;color:rgba(255,255,255,0.15);padding:4px 0;text-transform:uppercase;letter-spacing:0.1em">Playing · Alice's turn</div>
+          <div class="bj-after-seats">
+            <div class="mini-seat"><div class="mini-label">Alice ▸</div><div class="mini-hand" style="min-height:30px"><div class="mini-card black"></div><div class="mini-card red"></div></div></div>
+            <div class="mini-seat" style="border-color:rgba(244,197,66,0.4);background:rgba(244,197,66,0.04)"><div class="mini-label" style="color:#f4c542">You</div><div class="mini-hand" style="min-height:30px"><div class="mini-card red"></div><div class="mini-card black"></div></div></div>
+            <div class="mini-seat"><div class="mini-label">Bob</div><div class="mini-hand" style="min-height:30px"><div class="mini-card black"></div><div class="mini-card black"></div></div></div>
+          </div>
+        </div>
+        <div class="bj-after-controls">
+          <div class="mini-label">Hit · Stand · Double</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Judgement -->
+<div class="section-label" style="margin-top:8px">Judgement <span class="change-tag">wider player panel · larger trick zone · prominent hand at bottom · status badges</span></div>
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Before</div>
+    <div class="mockup-body">
+      <div class="jdg-before">
+        <div style="background:rgba(0,0,0,0.3);padding:5px 8px;border-radius:4px;font-size:0.55rem;color:#6b7280">Judgement · Round 2/7 · Trump ♠</div>
+        <div class="jdg-before-layout">
+          <div class="jdg-before-panel">
+            <div class="jdg-before-player"><div class="mini-label">Alice</div><div style="font-size:0.5rem;color:#6b7280">1/2 · 40pts</div></div>
+            <div class="jdg-before-player"><div class="mini-label">You</div><div style="font-size:0.5rem;color:#a78bfa">2/2 · 60pts</div></div>
+            <div class="jdg-before-player"><div class="mini-label">Bob</div><div style="font-size:0.5rem;color:#6b7280">0/1 · 30pts</div></div>
+          </div>
+          <div class="jdg-before-main">
+            <div style="font-size:0.55rem;color:#6b7280">Current trick</div>
+            <div class="jdg-before-trick">
+              <div class="jdg-trick-card"></div><div class="jdg-trick-card" style="background:#fff;border-top:3px solid #c0171f"></div>
+            </div>
+            <div class="empty-space" style="flex:1"><div class="empty-label">unused</div></div>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.3);padding:5px 8px;border-radius:4px;display:flex;gap:3px">
+          <div class="jdg-hand-card"></div><div class="jdg-hand-card"></div><div class="jdg-hand-card"></div><div class="jdg-hand-card"></div><div class="jdg-hand-card"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mockup">
+    <div class="mockup-header">After</div>
+    <div class="mockup-body">
+      <div class="jdg-after">
+        <div class="jdg-after-topbar">
+          <span class="dot"></span><span style="color:#a78bfa;font-weight:700">Judgement</span>
+          <span class="jdg-badge">Round 2/7</span>
+          <span class="jdg-badge" style="color:#f87171;border-color:rgba(248,113,113,0.3)">Trump ♥</span>
+          <span class="jdg-badge">Hand: 3</span>
+        </div>
+        <div class="jdg-after-body">
+          <div class="jdg-after-panel">
+            <div class="jdg-after-player active"><div class="mini-label" style="color:#a78bfa">▸ You</div><div style="font-size:0.52rem;color:#a78bfa">2/2 · 60pts</div></div>
+            <div class="jdg-after-player"><div class="mini-label">Alice</div><div style="font-size:0.52rem;color:#6b7280">1/2 · 40pts</div></div>
+            <div class="jdg-after-player"><div class="mini-label">Bob</div><div style="font-size:0.52rem;color:#6b7280">0/1 · 30pts</div></div>
+          </div>
+          <div class="jdg-after-main">
+            <div class="jdg-status-bar">
+              <span class="jdg-badge">Trick 2 of 3</span>
+              <span class="jdg-badge" style="color:#4ade80;border-color:rgba(74,222,128,0.3)">Your turn</span>
+            </div>
+            <div class="jdg-trick-zone">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+                <div class="jdg-trick-card-lg"></div>
+                <span style="font-size:0.48rem;color:#6b7280">Alice</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+                <div class="jdg-trick-card-lg" style="border-top:3px solid #c0171f"></div>
+                <span style="font-size:0.48rem;color:#6b7280">Bob</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;opacity:0.35">
+                <div style="width:32px;height:46px;border:1px dashed rgba(255,255,255,0.15);border-radius:4px"></div>
+                <span style="font-size:0.48rem;color:#6b7280">You</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="jdg-after-hand">
+          <div class="jdg-hand-card-lg valid"></div>
+          <div class="jdg-hand-card-lg"></div>
+          <div class="jdg-hand-card-lg valid"></div>
+          <div class="jdg-hand-card-lg"></div>
+          <div class="jdg-hand-card-lg valid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:4px">Purple-glowing cards in Judgement's hand = valid plays. Dimmed = not playable. Player slot in trick area shows empty placeholder until you play.</p>
