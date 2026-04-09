@@ -203,9 +203,9 @@
 }
 
 .pk-guide-card {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-family: var(--font-mono);
-  padding: 2px 4px;
+  padding: 3px 7px;
   border-radius: 3px;
   line-height: 1.3;
   border: 1px solid;
