@@ -113,7 +113,7 @@
 }
 
 .pk-side {
-  width: 220px;
+  width: 270px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -134,9 +134,13 @@
   min-width: 0;
 }
 
+@media (max-width: 1050px) {
+  .pk-side { width: 200px; }
+}
+
 @media (max-width: 900px) {
   .pk-hand-guide { display: none; }
-  .pk-side.pk-live-feed { width: 160px; }
+  .pk-side.pk-live-feed { width: 180px; }
 }
 
 @media (max-width: 640px) {
@@ -151,11 +155,11 @@
 
 .pk-guide-title {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-4);
-  padding: 10px 12px 6px;
+  padding: 12px 14px 8px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -170,39 +174,39 @@
 .pk-guide-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 5px 12px;
+  gap: 10px;
+  padding: 7px 14px;
 }
 
 .pk-guide-rank-num {
   font-family: var(--font-display);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  width: 14px;
+  width: 16px;
   text-align: right;
   flex-shrink: 0;
   padding-top: 2px;
 }
 
-.pk-guide-info { display: flex; flex-direction: column; gap: 2px; }
+.pk-guide-info { display: flex; flex-direction: column; gap: 3px; }
 
 .pk-guide-name {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
   line-height: 1;
 }
 
 .pk-guide-cards {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   flex-wrap: wrap;
 }
 
 .pk-guide-card {
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-family: var(--font-mono);
-  padding: 1px 3px;
-  border-radius: 2px;
+  padding: 2px 4px;
+  border-radius: 3px;
   line-height: 1.3;
   border: 1px solid;
 }
@@ -300,20 +304,20 @@
 
 .pk-felt {
   position: relative;
-  width: min(540px, 100%);
+  width: min(600px, 100%);
   aspect-ratio: 16 / 10;
   background: radial-gradient(ellipse at center, #1c4a1c 0%, #0e2b0e 60%, #091e09 100%);
-  border: 3px solid #2d5a1b;
+  border: 4px solid #2d5a1b;
   border-radius: 50%;
   box-shadow:
-    0 0 0 5px #152610,
-    0 0 0 9px #0d1a09,
+    0 0 0 6px #152610,
+    0 0 0 11px #0d1a09,
     var(--shadow-lg);
 
   @media (max-width: 640px) {
     aspect-ratio: 4 / 5;
     border-radius: 42%;
-    width: min(340px, 100%);
+    width: min(360px, 100%);
   }
 }
 
@@ -339,7 +343,7 @@
 
 .pk-community-cards {
   display: flex;
-  gap: 5px;
+  gap: 7px;
 }
 
 /* ─── Seats ── */
@@ -358,46 +362,46 @@
 
 /* Bottom = human */
 .pk-seat-bottom {
-  bottom: -72px;
+  bottom: -120px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 /* Top = bot opposite human */
 .pk-seat-top {
-  top: -72px;
+  top: -120px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 /* Left bot */
 .pk-seat-left {
-  left: -86px;
+  left: -148px;
   top: 50%;
   transform: translateY(-50%);
 }
 
 /* Right bot */
 .pk-seat-right {
-  right: -86px;
+  right: -148px;
   top: 50%;
   transform: translateY(-50%);
 }
 
 @media (max-width: 640px) {
-  .pk-seat-left  { left: -70px; }
-  .pk-seat-right { right: -70px; }
-  .pk-seat-bottom { bottom: -80px; }
-  .pk-seat-top    { top: -80px; }
+  .pk-seat-left  { left: -110px; }
+  .pk-seat-right { right: -110px; }
+  .pk-seat-bottom { bottom: -130px; }
+  .pk-seat-top    { top: -130px; }
 }
 
 .pk-seat-chip {
   background: color-mix(in srgb, var(--bg-3) 92%, transparent);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  min-width: 88px;
-  max-width: 120px;
+  padding: 8px 14px;
+  min-width: 120px;
+  max-width: 160px;
   text-align: center;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
@@ -420,10 +424,10 @@
   margin-bottom: 3px;
 }
 
-.pk-seat-avatar { font-size: 0.85rem; }
+.pk-seat-avatar { font-size: 1.05rem; }
 
 .pk-seat-name {
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   color: var(--text-2);
   font-family: var(--font-display);
   letter-spacing: 0.03em;
@@ -432,23 +436,23 @@
 
 .pk-seat-chips {
   font-family: var(--font-display);
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   color: var(--gold);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .pk-seat-bet {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: var(--text-4);
 }
 
 .pk-status-tag {
-  font-size: 0.58rem;
+  font-size: 0.7rem;
   letter-spacing: 0.05em;
   border-radius: 20px;
-  padding: 1px 6px;
+  padding: 2px 8px;
   display: inline-block;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .pk-allin  { background: rgba(230,57,70,0.15); color: #f43f5e; border: 1px solid rgba(244,63,94,0.3); }
@@ -456,28 +460,28 @@
 .pk-win-tag  { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
 
 .pk-hand-eval {
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   color: var(--gold);
   background: rgba(245,158,11,0.1);
   border: 1px solid rgba(245,158,11,0.2);
   border-radius: 20px;
-  padding: 1px 6px;
-  margin-top: 2px;
+  padding: 2px 8px;
+  margin-top: 3px;
   display: inline-block;
 }
 
 .pk-thinking-badge {
-  font-size: 0.58rem;
+  font-size: 0.7rem;
   color: var(--text-4);
   font-style: italic;
   animation: pk-pulse 1.1s ease-in-out infinite;
 }
 
 .pk-last-action {
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   border-radius: 20px;
-  padding: 1px 6px;
-  margin-top: 2px;
+  padding: 2px 8px;
+  margin-top: 3px;
   display: inline-block;
   font-style: italic;
 }
@@ -493,87 +497,132 @@
 
 .pk-hole-cards {
   display: flex;
-  gap: 3px;
+  gap: 6px;
 }
 
 .pk-yours { margin-top: 2px; }
 
-/* ─── Playing Card ── */
+/* ─── Playing Card — matches Blackjack card design ── */
 
 .pk-card {
   position: relative;
-  width: 50px;
-  height: 70px;
-  border-radius: 5px;
+  width: 88px;
+  height: 126px;
+  border-radius: 10px;
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.12);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  animation: pk-deal-in 0.35s var(--ease-spring) both;
-  animation-delay: calc(var(--ci, 0) * 55ms);
+  animation: pk-deal-in 0.65s cubic-bezier(0.34, 1.42, 0.64, 1) both;
+  animation-delay: calc(var(--ci, 0) * 0.18s);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.65),
+    0 2px 6px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -1px 0 rgba(0,0,0,0.08);
 
   @media (max-width: 640px) {
-    width: 42px;
-    height: 60px;
+    width: 68px;
+    height: 97px;
   }
 }
 
+/* Shine overlay — matches BJ */
+.pk-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.32) 0%,
+    rgba(255,255,255,0.06) 40%,
+    transparent 60%
+  );
+  border-radius: 10px;
+  pointer-events: none; z-index: 3;
+}
+
+.pk-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12);
+  pointer-events: none; z-index: 4;
+}
+
+/* Deal animation: fly in from top-left (deck position), stagger per card */
 @keyframes pk-deal-in {
-  from { opacity: 0; transform: translateY(-16px) scale(0.88); }
-  to   { opacity: 1; transform: none; }
+  0%   { transform: translateX(-80px) translateY(-50px) rotate(-8deg) scale(0.68); opacity: 0; }
+  50%  { opacity: 1; }
+  75%  { transform: translateX(2px) translateY(-2px) rotate(0.3deg) scale(1.02); }
+  100% { transform: translateX(0) translateY(0) rotate(0deg) scale(1); opacity: 1; }
 }
 
+/* Small cards for side-seat bots */
 .pk-card-sm {
-  width: 34px;
-  height: 48px;
+  width: 62px;
+  height: 88px;
+  border-radius: 7px;
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.55),
+    0 1px 4px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.45);
 }
-.pk-card-sm .pk-card-rank { font-size: 0.58rem; }
-.pk-card-sm .pk-card-suit-sm { font-size: 0.48rem; }
-.pk-card-sm .pk-card-center { font-size: 0.9rem; }
+.pk-card-sm::before { border-radius: 7px; }
+.pk-card-sm::after  { border-radius: 7px; }
+.pk-card-sm .pk-card-rank { font-size: 0.82rem; }
+.pk-card-sm .pk-card-suit-sm { font-size: 0.56rem; }
+.pk-card-sm .pk-card-center { font-size: 1.6rem; }
 
-.pk-card-red   { color: #dc2626; }
-.pk-card-black { color: #111; }
+.pk-card-red  { background: #fff; color: #c0171f; }
+.pk-card-black { background: #fff; color: #1a1a1a; }
 
 .pk-card-tl {
   position: absolute;
-  top: 3px; left: 4px;
+  top: 5px; left: 6px;
   display: flex; flex-direction: column;
   align-items: flex-start;
   line-height: 1;
+  gap: 1px;
+  z-index: 2;
 }
 .pk-card-br {
   position: absolute;
-  bottom: 3px; right: 4px;
+  bottom: 5px; right: 6px;
   display: flex; flex-direction: column;
   align-items: flex-end;
   line-height: 1;
+  gap: 1px;
+  z-index: 2;
   transform: rotate(180deg);
 }
 
-.pk-card-rank    { font-size: 0.72rem; font-weight: 700; line-height: 1; }
-.pk-card-suit-sm { font-size: 0.58rem; line-height: 1; }
-.pk-card-center  { font-size: 1.3rem; line-height: 1; }
+.pk-card-rank {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-family: 'Georgia', serif;
+  line-height: 1;
+}
+.pk-card-suit-sm { font-size: 0.75rem; line-height: 1; }
+.pk-card-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.8rem;
+  line-height: 1;
+  user-select: none;
+  z-index: 1;
+}
 
-/* Card back */
+/* Card back — matches BJ hidden card */
 .pk-card-back {
-  background: linear-gradient(135deg, #1e3a5f, #0f1e3a);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(135deg, #1a1a6e 0%, #0d0d4a 100%);
+  border: 2px solid rgba(100,100,200,0.3);
 }
 .pk-card-back-inner {
-  width: 76%;
-  height: 76%;
-  border: 2px solid rgba(255,255,255,0.14);
-  border-radius: 3px;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 3px,
-    rgba(255,255,255,0.04) 3px,
-    rgba(255,255,255,0.04) 6px
-  );
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(100,100,220,0.2) 0px, rgba(100,100,220,0.2) 2px, transparent 2px, transparent 10px),
+    repeating-linear-gradient(-45deg, rgba(100,100,220,0.2) 0px, rgba(100,100,220,0.2) 2px, transparent 2px, transparent 10px);
+  border: 4px solid rgba(100,100,220,0.15);
 }
 
 /* ─── Controls ── */
@@ -581,34 +630,42 @@
 .pk-controls {
   background: color-mix(in srgb, var(--bg-0) 92%, transparent);
   border-top: 1px solid var(--border);
-  padding: 10px 16px;
+  padding: 12px 20px;
   flex-shrink: 0;
 }
 
-.pk-action-panel { display: flex; flex-direction: column; gap: 8px; }
+.pk-action-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
 
 .pk-action-context {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-4);
+  text-align: center;
 }
 
 .pk-call-context strong { color: var(--gold); }
 
 .pk-action-row {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
 }
 
 .pk-btn {
   border: none;
   border-radius: var(--radius-sm);
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0.05em;
   cursor: pointer;
-  padding: 9px 16px;
+  padding: 11px 28px;
+  min-width: 130px;
   transition: var(--transition);
   white-space: nowrap;
 }
@@ -649,11 +706,14 @@
 .pk-raise-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
 }
 
 .pk-raise-label {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   color: var(--text-4);
   white-space: nowrap;
 }
@@ -661,8 +721,8 @@
 .pk-slider {
   flex: 1;
   accent-color: var(--gold);
-  min-width: 80px;
-  max-width: 200px;
+  min-width: 120px;
+  max-width: 280px;
 }
 
 .pk-waiting-bar {
@@ -670,9 +730,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 8px;
+  padding: 10px;
   color: var(--text-4);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-style: italic;
 }
 
@@ -730,11 +790,11 @@
 
 .pk-feed-title {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-4);
-  padding: 10px 12px 6px;
+  padding: 12px 14px 8px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -752,21 +812,21 @@
 
 .pk-feed-phase {
   font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   letter-spacing: 0.1em;
   color: var(--gold);
-  padding: 5px 10px 3px;
+  padding: 6px 12px 4px;
   border-top: 1px solid var(--border);
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .pk-feed-entry {
   display: flex;
   align-items: baseline;
   gap: 5px;
-  padding: 3px 10px;
-  font-size: 0.7rem;
-  line-height: 1.4;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 .pk-feed-who {
