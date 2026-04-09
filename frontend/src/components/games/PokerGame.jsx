@@ -301,11 +301,20 @@ export default function PokerGame() {
 
     setGs(prev => {
       if (!prev || prev.winners) return prev;
-      const revealed = prev.players.map(p => ({
+      // Reveal all cards temporarily to determine the winner
+      const allRevealed = prev.players.map(p => ({
         ...p, holeCards: p.holeCards.map(c => ({ ...c, hidden: false })),
       }));
-      const winIds = determineWinners(revealed, prev.communityCards);
-      return { ...prev, players: revealed, winners: winIds };
+      const winIds = determineWinners(allRevealed, prev.communityCards);
+      // Only keep winner cards face-up; human always sees their own cards
+      const finalPlayers = prev.players.map(p => ({
+        ...p,
+        holeCards: p.holeCards.map(c => ({
+          ...c,
+          hidden: !winIds.includes(p.id) && !p.isHuman,
+        })),
+      }));
+      return { ...prev, players: finalPlayers, winners: winIds };
     });
   }, [gs?.phase, gs?.winners]);
 
@@ -532,7 +541,7 @@ export default function PokerGame() {
                 const isBB      = i === bbIdx;
                 const isActive  = i === activeIdx && phase !== 'showdown';
                 const isWinner  = winners?.includes(p.id);
-                const handEval  = (phase === 'showdown' || winners)
+                const handEval  = (phase === 'showdown' || winners) && (isWinner || p.isHuman)
                   ? bestHand(p.holeCards, communityCards)
                   : null;
 
