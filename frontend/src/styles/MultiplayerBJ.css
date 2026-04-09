@@ -2,7 +2,7 @@
 
 .mbj-page {
   min-height: 100vh;
-  background: var(--bg-primary);
+  background: var(--bg-1);
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -15,7 +15,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: rgba(13,13,26,0.97);
+  background: color-mix(in srgb, var(--bg-0) 97%, transparent);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(230,57,70,0.2);
   position: sticky;
   top: 0;
@@ -191,7 +192,7 @@
 
 .mbj-seat-name {
   font-size: 0.82rem;
-  color: var(--text-primary);
+  color: var(--text-1);
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -252,7 +253,7 @@
 
 .mbj-score-row {
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: var(--text-3);
   font-family: var(--font-display);
 }
 
@@ -419,7 +420,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--text-muted);
+  color: var(--text-3);
   font-size: 0.85rem;
 }
 
@@ -476,7 +477,7 @@
 
 .mbj-waiting-host {
   font-size: 0.8rem;
-  color: var(--text-dim);
+  color: var(--text-4);
   text-align: center;
 }
 

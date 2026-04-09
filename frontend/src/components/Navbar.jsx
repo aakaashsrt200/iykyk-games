@@ -1,5 +1,29 @@
 import React, { useState, useEffect } from 'react';
 
+function ThemeToggle() {
+  const [theme, setTheme] = useState(
+    () => document.documentElement.getAttribute('data-theme') || 'dark'
+  );
+
+  const toggle = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('iykyk-theme', next);
+    setTheme(next);
+  };
+
+  return (
+    <button
+      className="theme-toggle-btn"
+      onClick={toggle}
+      title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label="Toggle colour theme"
+    >
+      {theme === 'dark' ? '☀' : '☾'}
+    </button>
+  );
+}
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
@@ -20,6 +44,8 @@ export default function Navbar() {
         <span className="suits">♠ ♥ ♦ ♣</span>
         The Card Game Arena
       </div>
+
+      <ThemeToggle />
     </nav>
   );
 }

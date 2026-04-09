@@ -2,7 +2,7 @@
 
 .room-page {
   min-height: 100vh;
-  background: var(--bg-primary);
+  background: var(--bg-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,13 +31,14 @@
 .room-entry-card {
   width: 100%;
   max-width: 440px;
-  background: var(--bg-card);
+  background: var(--bg-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 36px 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  box-shadow: var(--shadow-md);
 }
 
 .room-entry-logo {
@@ -54,13 +55,13 @@
 .room-entry-logo h1 {
   font-family: var(--font-display);
   font-size: 1.4rem;
-  color: var(--text-primary);
+  color: var(--text-1);
   letter-spacing: 0.06em;
 }
 
 .room-entry-sub {
   font-size: 0.8rem;
-  color: var(--text-dim);
+  color: var(--text-4);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-top: -10px;
@@ -76,26 +77,28 @@
 
 .room-field label {
   font-size: 0.75rem;
-  color: var(--text-dim);
+  color: var(--text-4);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
 .room-input {
-  background: rgba(0,0,0,0.3);
-  border: 1px solid var(--border);
+  background: var(--bg-2);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  color: var(--text-primary);
+  color: var(--text-1);
   font-family: var(--font-body);
   font-size: 0.95rem;
   padding: 10px 14px;
   outline: none;
-  transition: var(--transition);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.room-input::placeholder { color: var(--text-4); }
+
 .room-input:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(244,197,66,0.1);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--gold-dim);
 }
 
 .room-input.code-input {
@@ -130,14 +133,15 @@
 }
 
 .room-btn.secondary {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  background: var(--btn-glass-bg);
+  border: 1.5px solid var(--btn-glass-border);
+  color: var(--text-3);
 }
 
 .room-btn.secondary:hover:not(:disabled) {
-  border-color: var(--gold);
+  border-color: var(--border-hover);
   color: var(--gold);
+  background: var(--gold-dim);
 }
 
 .room-btn.danger {
@@ -183,7 +187,7 @@
 
 .room-hint {
   font-size: 0.8rem;
-  color: var(--text-dim);
+  color: var(--text-4);
   line-height: 1.5;
 }
 
@@ -209,16 +213,20 @@
 .room-solo-link {
   background: none;
   border: none;
-  color: var(--text-dim);
+  color: var(--text-4);
   font-size: 0.8rem;
   cursor: pointer;
   text-align: center;
   padding: 4px;
-  transition: var(--transition);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
   letter-spacing: 0.04em;
 }
 
-.room-solo-link:hover { color: var(--text-muted); }
+.room-solo-link:hover { color: var(--text-3); }
 
 .room-code-display {
   text-align: center;
@@ -243,7 +251,7 @@
 .lobby-card {
   width: 100%;
   max-width: 560px;
-  background: var(--bg-card);
+  background: var(--bg-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 32px 28px;
@@ -251,6 +259,7 @@
   flex-direction: column;
   gap: 24px;
   margin: 0 auto;
+  box-shadow: var(--shadow-md);
 }
 
 .lobby-header { display: flex; flex-direction: column; gap: 16px; }
@@ -264,15 +273,15 @@
 .lobby-title-row h2 {
   font-family: var(--font-display);
   font-size: 1.3rem;
-  color: var(--text-primary);
+  color: var(--text-1);
   letter-spacing: 0.08em;
   flex: 1;
 }
 
 .lobby-badge {
   font-size: 0.72rem;
-  color: var(--text-muted);
-  background: rgba(255,255,255,0.06);
+  color: var(--text-3);
+  background: var(--bg-4);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 3px 10px;
@@ -331,10 +340,10 @@
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  transition: var(--transition);
+  transition: border-color 0.2s, background 0.2s;
 }
 
 .lobby-player.me {
@@ -350,13 +359,13 @@
 .lobby-player-name {
   flex: 1;
   font-size: 0.9rem;
-  color: var(--text-primary);
+  color: var(--text-1);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.lobby-player-name.dim { color: var(--text-dim); font-style: italic; }
+.lobby-player-name.dim { color: var(--text-4); font-style: italic; }
 
 .lobby-you-tag, .lobby-host-tag {
   font-size: 0.65rem;
@@ -377,7 +386,7 @@
 
 .lobby-player-balance {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--text-3);
   font-family: var(--font-display);
 }
 
@@ -385,7 +394,7 @@
 
 .lobby-waiting {
   font-size: 0.82rem;
-  color: var(--text-dim);
+  color: var(--text-4);
   text-align: center;
   font-style: italic;
   animation: pulse 2s ease-in-out infinite;

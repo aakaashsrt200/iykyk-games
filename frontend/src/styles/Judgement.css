@@ -1,18 +1,27 @@
 /* ─── Judgement Game Design System ──────────────────────────────────────────── */
 
-/* CSS variables */
-:root {
-  --jdg-bg:        #060d1a;
-  --jdg-surface:   #0d1a2d;
-  --jdg-border:    rgba(255, 255, 255, 0.1);
+/* CSS variables — map to global design system tokens */
+:root, [data-theme="dark"] {
+  --jdg-bg:        var(--bg-1);
+  --jdg-surface:   var(--bg-3);
+  --jdg-border:    var(--border);
   --jdg-purple:    #7c3aed;
   --jdg-purple-lt: #a78bfa;
-  --jdg-gold:      #f59e0b;
+  --jdg-gold:      var(--gold);
   --jdg-green:     #10b981;
-  --jdg-red:       #ef4444;
-  --jdg-text:      #e8eaf0;
-  --jdg-dim:       #9ca3af;
-  --jdg-muted:     #6b7280;
+  --jdg-red:       var(--red);
+  --jdg-text:      var(--text-1);
+  --jdg-dim:       var(--text-3);
+  --jdg-muted:     var(--text-4);
+}
+
+[data-theme="light"] {
+  --jdg-bg:      var(--bg-1);
+  --jdg-surface: var(--bg-3);
+  --jdg-border:  var(--border);
+  --jdg-text:    var(--text-1);
+  --jdg-dim:     var(--text-3);
+  --jdg-muted:   var(--text-4);
 }
 
 /* ─── Page shell ─────────────────────────────────────────────────────────────── */
@@ -269,8 +278,8 @@
 
 /* ─── Hand area ──────────────────────────────────────────────────────────────── */
 .jdg-hand-area {
-  background: #0a1628;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-2);
+  border-top: 1px solid var(--jdg-border);
   padding: 14px 20px;
   flex-shrink: 0;
 }
@@ -440,7 +449,7 @@
 }
 
 .jdg-score-modal-box {
-  background: #0d1a2d;
+  background: var(--bg-3);
   border: 1px solid rgba(124, 58, 237, 0.3);
   border-radius: 16px;
   padding: 24px;
@@ -448,7 +457,7 @@
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ─── Toast notifications ────────────────────────────────────────────────────── */
@@ -456,14 +465,14 @@
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #1e2c45;
+  background: var(--bg-3);
   border: 1px solid rgba(167, 139, 250, 0.4);
   border-radius: 10px;
   padding: 12px 18px;
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--jdg-text);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-md);
   z-index: 200;
   animation: jdg-toast-in 0.25s ease;
   max-width: 280px;
