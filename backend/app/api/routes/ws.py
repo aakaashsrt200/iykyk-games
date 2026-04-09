@@ -4,6 +4,7 @@ from app.core.connection_manager import manager
 from app.services import room_service
 import app.services.blackjack_service as bj
 import app.services.judgement_service as jdg
+import app.services.poker_service as poker
 from app.services.timer_service import timer_service
 
 router = APIRouter()
@@ -189,6 +190,71 @@ async def handle_judgement_action(websocket: WebSocket, room: dict, player: dict
         timer_service.stop(room_id)
 
 
+async def poker_broadcast(room_id: str, gs: dict, room: dict, players_db: list) -> None:
+    """Broadcast personalized poker state (hole cards hidden from others)."""
+    def make_msg(player_id: str) -> dict:
+        seat = next((str(p['seat']) for p in players_db if p['id'] == player_id), None)
+        personal_gs = poker.get_personalized_state(gs, seat) if seat else poker.get_personalized_state(gs, None)
+        return {'type': 'state', 'room': {**room, 'game_state': personal_gs}, 'players': players_db}
+
+    await manager.broadcast_personalized(room_id, make_msg)
+
+
+async def handle_poker_action(websocket: WebSocket, room: dict, player: dict, data: dict) -> None:
+    room_id = room['id']
+    gs = room.get('game_state') or {}
+    action = data.get('type')
+    seat = str(player['seat'])
+
+    new_gs = None
+
+    if action == 'start_game':
+        if not player.get('is_host'):
+            await manager.send(websocket, {'type': 'error', 'message': 'Only the host can start the game.'})
+            return
+        players = await room_service.get_players(room_id)
+        if len(players) < 2:
+            await manager.send(websocket, {'type': 'error', 'message': 'Need at least 2 players to start.'})
+            return
+        new_gs = poker.start_game(players)
+        await room_service.update_room(room_id, game_state=new_gs, status='playing')
+        players_db = await room_service.get_players(room_id)
+        await poker_broadcast(room_id, new_gs, room, players_db)
+        return
+
+    elif action == 'poker_action':
+        player_action = data.get('action')
+        amount = data.get('amount')
+        new_gs = poker.apply_action(gs, seat, player_action, amount)
+
+    elif action == 'next_hand':
+        if not player.get('is_host'):
+            await manager.send(websocket, {'type': 'error', 'message': 'Only the host can start the next hand.'})
+            return
+        new_gs = poker.start_next_hand(gs)
+        if new_gs is None:
+            await manager.send(websocket, {'type': 'error', 'message': 'Game over — not enough players.'})
+            return
+
+    elif action in ('leave_room', 'close_room'):
+        await handle_leave_or_close(room, player, action)
+        return
+
+    else:
+        await manager.send(websocket, {'type': 'error', 'message': f'Unknown poker action: {action}'})
+        return
+
+    if new_gs is None:
+        await manager.send(websocket, {'type': 'error', 'message': 'Invalid action or not your turn.'})
+        return
+
+    status = 'playing' if new_gs.get('phase') != 'game_over' else 'closed'
+    await room_service.update_room(room_id, game_state=new_gs, status=status)
+    room_updated = await room_service.get_room_by_id(room_id) or room
+    players_db = await room_service.get_players(room_id)
+    await poker_broadcast(room_id, new_gs, room_updated, players_db)
+
+
 async def handle_leave_or_close(room: dict, player: dict, action: str) -> None:
     room_id = room['id']
     if action == 'close_room' or player.get('is_host'):
@@ -244,6 +310,8 @@ async def ws_room(websocket: WebSocket, code: str, player_token: str):
                 await handle_blackjack_action(websocket, room, player, data)
             elif game_type == 'judgement':
                 await handle_judgement_action(websocket, room, player, data)
+            elif game_type == 'poker':
+                await handle_poker_action(websocket, room, player, data)
 
     except WebSocketDisconnect:
         pass

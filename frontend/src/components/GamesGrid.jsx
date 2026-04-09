@@ -14,6 +14,7 @@ const LIVE_GAMES = [
     disabled: false,
     beta: true,
     path: '/games/poker',
+    multiplayerPath: '/games/poker/rooms',
     rules: {
       title: "How to Play Poker (Texas Hold'em)",
       points: [

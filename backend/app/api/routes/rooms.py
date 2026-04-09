@@ -5,7 +5,7 @@ from app.services import room_service
 
 router = APIRouter(prefix="/api/rooms", tags=["Rooms"])
 
-VALID_GAME_TYPES = {"blackjack", "judgement"}
+VALID_GAME_TYPES = {"blackjack", "judgement", "poker"}
 
 
 class CreateRoomRequest(BaseModel):

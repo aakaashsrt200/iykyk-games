@@ -11,6 +11,8 @@ import JudgementRooms from './components/rooms/JudgementRooms';
 import JudgementRoomPage from './components/rooms/JudgementRoomPage';
 import JudgementScorer from './components/games/JudgementScorer';
 import PokerGame from './components/games/PokerGame';
+import PokerRooms from './components/rooms/PokerRooms';
+import PokerRoomPage from './components/rooms/PokerRoomPage';
 
 function LandingPage() {
   return (
@@ -37,6 +39,8 @@ function App() {
         <Route path="/games/judgement/scorer" element={<JudgementScorer />} />
         <Route path="/games/judgement/:code" element={<JudgementRoomPage />} />
         <Route path="/games/poker" element={<PokerGame />} />
+        <Route path="/games/poker/rooms" element={<PokerRooms />} />
+        <Route path="/games/poker/rooms/:code" element={<PokerRoomPage />} />
       </Routes>
     </Router>
   );

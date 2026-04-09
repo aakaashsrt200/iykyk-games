@@ -29,6 +29,19 @@ class ConnectionManager:
         for ws in dead:
             self.disconnect(ws, room_id)
 
+    async def broadcast_personalized(self, room_id: str, fn) -> None:
+        """Send personalized messages: fn(player_id) -> dict."""
+        pairs = list(self._rooms.get(room_id, set()))
+        dead = []
+        for ws, pid in pairs:
+            try:
+                msg = fn(pid)
+                await ws.send_json(msg)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(ws, room_id)
+
     async def send(self, websocket: WebSocket, message: dict) -> None:
         try:
             await websocket.send_json(message)
