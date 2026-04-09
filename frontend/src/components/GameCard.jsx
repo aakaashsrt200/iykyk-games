@@ -25,7 +25,7 @@ function RulesModal({ rules, accentColor, onClose }) {
 
 export default function GameCard({ game }) {
   const { name, suit, suitColor, caption, description, players,
-          accentColor, disabled, path, multiplayerPath, multiplayerOnly, scorerPath, rules } = game;
+          accentColor, disabled, beta, path, multiplayerPath, multiplayerOnly, scorerPath, rules } = game;
   const navigate = useNavigate();
   const [showRules, setShowRules] = useState(false);
 
@@ -49,6 +49,7 @@ export default function GameCard({ game }) {
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="game-caption-tag">{caption}</span>
+            {beta && <span className="game-beta-tag">BETA</span>}
             {rules && (
               <button
                 className="rules-icon-btn"

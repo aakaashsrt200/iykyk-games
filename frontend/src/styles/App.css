@@ -553,6 +553,17 @@ body {
   border: 1px solid rgba(255,255,255,0.1);
 }
 
+.game-beta-tag {
+  font-size: 0.6rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 20px;
+  padding: 2px 7px;
+}
+
 /* ? rules button — touch target ≥ 44×44px (WCAG 2.5.5) */
 .rules-icon-btn {
   width: 44px;

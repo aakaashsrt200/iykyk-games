@@ -10,6 +10,7 @@ import RoomPage from './components/rooms/RoomPage';
 import JudgementRooms from './components/rooms/JudgementRooms';
 import JudgementRoomPage from './components/rooms/JudgementRoomPage';
 import JudgementScorer from './components/games/JudgementScorer';
+import PokerGame from './components/games/PokerGame';
 
 function LandingPage() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/games/judgement" element={<JudgementRooms />} />
         <Route path="/games/judgement/scorer" element={<JudgementScorer />} />
         <Route path="/games/judgement/:code" element={<JudgementRoomPage />} />
+        <Route path="/games/poker" element={<PokerGame />} />
       </Routes>
     </Router>
   );

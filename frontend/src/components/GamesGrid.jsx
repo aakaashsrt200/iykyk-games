@@ -3,6 +3,29 @@ import GameCard from './GameCard';
 
 const LIVE_GAMES = [
   {
+    id: 1,
+    name: 'Poker',
+    suit: '♠',
+    suitColor: 'white',
+    caption: 'Strategy & Bluff',
+    description: "The definitive game of skill, psychology, and nerve. Read your opponents, bluff your way to glory, and take the pot.",
+    players: '3',
+    accentColor: '#f4c542',
+    disabled: false,
+    beta: true,
+    path: '/games/poker',
+    rules: {
+      title: "How to Play Poker (Texas Hold'em)",
+      points: [
+        "Each player receives 2 private hole cards; 5 community cards are dealt face-up over 3 rounds (Flop, Turn, River)",
+        "Make the best 5-card hand using any combination of your hole cards and the community cards",
+        "Hand rankings (best to worst): Royal Flush · Straight Flush · Four of a Kind · Full House · Flush · Straight · Three of a Kind · Two Pair · Pair · High Card",
+        "Bet, call, raise, or fold in each betting round",
+        "Last player standing or best hand at showdown wins the pot",
+      ],
+    },
+  },
+  {
     id: 2,
     name: 'Blackjack',
     suit: '♦',
@@ -55,27 +78,6 @@ const LIVE_GAMES = [
 ];
 
 const COMING_SOON_GAMES = [
-  {
-    id: 1,
-    name: 'Poker',
-    suit: '♠',
-    suitColor: 'white',
-    caption: 'Strategy & Bluff',
-    description: "The definitive game of skill, psychology, and nerve. Read your opponents, bluff your way to glory, and take the pot.",
-    players: '2–9',
-    accentColor: '#f4c542',
-    disabled: true,
-    rules: {
-      title: "How to Play Poker (Texas Hold'em)",
-      points: [
-        "Each player receives 2 private hole cards; 5 community cards are dealt face-up over 3 rounds (Flop, Turn, River)",
-        "Make the best 5-card hand using any combination of your hole cards and the community cards",
-        "Hand rankings (best to worst): Royal Flush · Straight Flush · Four of a Kind · Full House · Flush · Straight · Three of a Kind · Two Pair · Pair · High Card",
-        "Bet, call, raise, or fold in each betting round",
-        "Last player standing or best hand at showdown wins the pot",
-      ],
-    },
-  },
   {
     id: 3,
     name: 'Teen Patti',
