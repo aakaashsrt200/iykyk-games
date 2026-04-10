@@ -1,0 +1,389 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0e14; color: #e2e8f0; font-family: 'Inter', -apple-system, sans-serif; }
+
+  h2 { font-size: 1.4rem; color: #f1f5f9; margin-bottom: 6px; }
+  .subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 28px; }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .option {
+    background: #111827;
+    border: 2px solid #1e293b;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    display: flex;
+    flex-direction: column;
+  }
+  .option:hover { border-color: #334155; transform: translateY(-2px); }
+  .option.selected { border-color: #f59e0b !important; }
+  .option.selected .option-label { background: rgba(245,158,11,0.12); color: #f59e0b; }
+
+  .option-letter {
+    background: #1e293b;
+    padding: 8px 16px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .option-letter span { font-size: 0.9rem; color: #f1f5f9; }
+
+  .mockup-area {
+    padding: 14px;
+    flex: 1;
+    background: #0d1117;
+  }
+
+  .option-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #1e293b;
+  }
+  .option-title { font-size: 0.9rem; font-weight: 600; color: #f1f5f9; margin-bottom: 4px; }
+  .option-desc { font-size: 0.75rem; color: #64748b; line-height: 1.5; }
+
+  .tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .tag-rec { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+  .tag-bold { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+
+  /* ── Shared mockup primitives ── */
+  .felt {
+    background: radial-gradient(ellipse at center, #1c4a1c 0%, #0e2b0e 70%, #091e09 100%);
+    border: 2px solid #2d5a1b;
+    box-shadow: 0 0 0 3px #0d1a09;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .comm-cards {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+  .mini-card {
+    width: 16px; height: 22px;
+    background: #fff;
+    border-radius: 2px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .mini-card.back {
+    background: linear-gradient(135deg, #1a1a6e, #0d0d4a);
+    border-color: rgba(100,100,200,0.4);
+  }
+  .player-slot {
+    background: rgba(30,41,59,0.9);
+    border: 1px solid #334155;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    font-size: 0.55rem;
+    color: #94a3b8;
+  }
+  .player-slot.active { border-color: rgba(245,158,11,0.6); box-shadow: 0 0 8px rgba(245,158,11,0.2); }
+  .player-slot.you { border-color: rgba(99,102,241,0.5); }
+  .player-name { font-size: 0.55rem; color: #cbd5e1; font-weight: 600; white-space: nowrap; }
+  .player-chips { font-size: 0.5rem; color: #f59e0b; }
+  .mini-cards-row { display: flex; gap: 2px; }
+
+  /* ── OPTION A: Grid-based absolute-free layout ── */
+  .layout-a {
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    height: 220px;
+  }
+  .layout-a .top-players {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+  .layout-a .middle-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .layout-a .center-table {
+    flex: 1;
+    height: 100%;
+    border-radius: 50%;
+  }
+  .layout-a .bottom-players {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* ── OPTION B: Table-centric, players as rings around table ── */
+  .layout-b {
+    width: 100%;
+    height: 220px;
+    position: relative;
+  }
+  .layout-b .table-area {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .layout-b .rect-felt {
+    width: 55%;
+    height: 55%;
+    border-radius: 14px;
+    background: radial-gradient(ellipse at center, #1c4a1c 0%, #0e2b0e 70%, #091e09 100%);
+    border: 2px solid #2d5a1b;
+    box-shadow: 0 0 0 3px #0d1a09;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Players around the rect */
+  .layout-b .p-top    { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); }
+  .layout-b .p-bottom { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); }
+  .layout-b .p-left   { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); }
+  .layout-b .p-right  { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); }
+  .layout-b .p-tl     { position: absolute; top: 12px; left: 12px; }
+  .layout-b .p-tr     { position: absolute; top: 12px; right: 12px; }
+  .layout-b .p-bl     { position: absolute; bottom: 12px; left: 12px; }
+  .layout-b .p-br     { position: absolute; bottom: 12px; right: 12px; }
+
+  /* ── OPTION C: Flex rows — no absolute positioning at all ── */
+  .layout-c {
+    width: 100%;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .layout-c .row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1;
+  }
+  .layout-c .row.middle {
+    flex: 2;
+  }
+  .layout-c .small-table {
+    width: 100px;
+    height: 44px;
+    border-radius: 8px;
+    background: radial-gradient(ellipse at center, #1c4a1c 0%, #0e2b0e 70%, #091e09 100%);
+    border: 2px solid #2d5a1b;
+    box-shadow: 0 0 0 2px #0d1a09;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* detail pills */
+  .detail-row { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+  .detail-pill {
+    font-size: 0.48rem;
+    padding: 1px 5px;
+    border-radius: 10px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.25);
+    color: #fbbf24;
+  }
+  .winner-pill {
+    background: rgba(34,197,94,0.1);
+    border-color: rgba(34,197,94,0.3);
+    color: #4ade80;
+  }
+</style>
+
+<h2>Poker Table Layout Options</h2>
+<p class="subtitle">3 approaches — all responsive, no absolute-position overflow. Click to select your preferred direction.</p>
+
+<div class="options-grid">
+
+  <!-- OPTION A: Grid rows -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="option-letter">Option <span>A</span></div>
+    <div class="mockup-area">
+      <div class="layout-a">
+        <!-- Top players -->
+        <div class="top-players">
+          <div class="player-slot">
+            <div class="player-name">Rex</div>
+            <div class="player-chips">$466</div>
+            <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+          </div>
+        </div>
+        <!-- Middle row: left player | table | right player -->
+        <div class="middle-row">
+          <div class="player-slot active">
+            <div class="player-name">Aria</div>
+            <div class="player-chips">$310</div>
+            <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+          </div>
+          <div class="felt" style="flex:1;height:100%;border-radius:12px;">
+            <div class="comm-cards">
+              <div class="mini-card"></div><div class="mini-card"></div>
+              <div class="mini-card"></div><div class="mini-card"></div>
+              <div class="mini-card"></div>
+            </div>
+          </div>
+          <div class="player-slot">
+            <div class="player-name">Zara</div>
+            <div class="player-chips">$602</div>
+            <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+          </div>
+        </div>
+        <!-- Bottom: you -->
+        <div class="bottom-players">
+          <div class="player-slot you" style="flex-direction:row;gap:8px;padding:5px 10px;align-items:center;">
+            <div style="display:flex;flex-direction:column;gap:1px;">
+              <div class="player-name">You ♠</div>
+              <div class="player-chips">$466</div>
+              <div class="detail-row"><div class="detail-pill">Bet $24</div><div class="detail-pill">Full House</div></div>
+            </div>
+            <div class="mini-cards-row"><div class="mini-card" style="width:20px;height:28px;background:#fff;"></div><div class="mini-card" style="width:20px;height:28px;background:#fff;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="option-footer">
+      <div class="option-title">CSS Grid Rows <span class="tag tag-rec">RECOMMENDED</span></div>
+      <div class="option-desc">Table + players all in a grid. No absolute positioning. Scales cleanly with zoom. Player cards sit naturally in their row. Shape changes via border-radius only.</div>
+    </div>
+  </div>
+
+  <!-- OPTION B: Polygon table, players at corners/edges -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="option-letter">Option <span>B</span></div>
+    <div class="mockup-area">
+      <div class="layout-b">
+        <div class="table-area">
+          <div class="rect-felt">
+            <div class="comm-cards">
+              <div class="mini-card"></div><div class="mini-card"></div>
+              <div class="mini-card"></div><div class="mini-card"></div>
+              <div class="mini-card"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-top player-slot">
+          <div class="player-name">Rex</div>
+          <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+        </div>
+        <div class="p-left player-slot active">
+          <div class="player-name">Aria</div>
+          <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+        </div>
+        <div class="p-right player-slot">
+          <div class="player-name">Zara</div>
+          <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+        </div>
+        <div class="p-bottom player-slot you" style="flex-direction:row;gap:4px;">
+          <div style="display:flex;flex-direction:column;gap:1px;">
+            <div class="player-name">You</div>
+            <div class="player-chips">$466</div>
+          </div>
+          <div class="mini-cards-row"><div class="mini-card" style="background:#fff;"></div><div class="mini-card" style="background:#fff;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="option-footer">
+      <div class="option-title">Centered Table + Absolute Players</div>
+      <div class="option-desc">Current approach but with overflow:hidden container and clamped positioning. Table stays central. Players are % positioned. Overflow risk is managed by the wrapping box.</div>
+    </div>
+  </div>
+
+  <!-- OPTION C: Pure flex, tiny table -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="option-letter">Option <span>C</span></div>
+    <div class="mockup-area">
+      <div class="layout-c">
+        <!-- top row: opponent -->
+        <div class="row">
+          <div class="player-slot">
+            <div class="player-name">Rex</div>
+            <div class="player-chips">$466</div>
+            <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+          </div>
+        </div>
+        <!-- middle: left bot | table | right bot -->
+        <div class="row middle">
+          <div class="player-slot active">
+            <div class="player-name">Aria</div>
+            <div class="player-chips">$310</div>
+            <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+          </div>
+          <div class="small-table">
+            <div class="comm-cards">
+              <div class="mini-card" style="width:12px;height:16px;"></div>
+              <div class="mini-card" style="width:12px;height:16px;"></div>
+              <div class="mini-card" style="width:12px;height:16px;"></div>
+              <div class="mini-card" style="width:12px;height:16px;"></div>
+              <div class="mini-card" style="width:12px;height:16px;"></div>
+            </div>
+          </div>
+          <div class="player-slot">
+            <div class="player-name">Zara</div>
+            <div class="player-chips">$602</div>
+            <div class="mini-cards-row"><div class="mini-card back"></div><div class="mini-card back"></div></div>
+          </div>
+        </div>
+        <!-- bottom: you — large area -->
+        <div class="row" style="flex:1.5;">
+          <div class="player-slot you" style="flex-direction:row;gap:8px;padding:6px 12px;align-items:center;min-width:140px;">
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <div class="player-name" style="font-size:0.65rem;">You ♠</div>
+              <div class="player-chips" style="font-size:0.6rem;">$466</div>
+              <div class="detail-row">
+                <div class="detail-pill">Bet $24</div>
+                <div class="detail-pill winner-pill">Full House</div>
+              </div>
+            </div>
+            <div class="mini-cards-row">
+              <div class="mini-card" style="width:22px;height:30px;background:#fff;"></div>
+              <div class="mini-card" style="width:22px;height:30px;background:#fff;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="option-footer">
+      <div class="option-title">Tiny Table + Spacious Player Zones <span class="tag tag-bold">BOLD</span></div>
+      <div class="option-desc">Table is purely a card surface — minimum size. The bulk of the space goes to generous player panels with full chip counts, bets, hand names. Very legible, very modern.</div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px 18px;margin-top:8px;">
+  <div style="font-size:0.75rem;font-weight:600;color:#94a3b8;margin-bottom:8px;letter-spacing:0.08em;text-transform:uppercase;">What all 3 options share</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:0.72rem;color:#64748b;line-height:1.5;">
+    <div>✓ No overflow when zoomed — everything flex/grid based, contained within gameplay bounds</div>
+    <div>✓ Dynamic polygon: 2-4 → rect, 5 → pentagon, 6 → hexagon, driven by CSS clip-path</div>
+    <div>✓ Max 6 players enforced at room creation</div>
+  </div>
+</div>

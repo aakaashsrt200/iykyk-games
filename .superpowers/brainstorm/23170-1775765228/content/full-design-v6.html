@@ -1,0 +1,475 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0e14; color: #e2e8f0; }
+  h2 { font-size: 1.2rem; color: #f1f5f9; margin-bottom: 4px; }
+  .subtitle { font-size: 0.8rem; color: #64748b; margin-bottom: 18px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab { padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; cursor: pointer; border: 1px solid #1e293b; background: #111827; color: #64748b; transition: all 0.15s; }
+  .tab.active { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #f59e0b; }
+
+  .game-frame {
+    background: #0d1117; border: 1px solid #1e293b; border-radius: 12px;
+    overflow: hidden; height: 500px; display: flex; flex-direction: column;
+  }
+  .gf-header {
+    background: rgba(10,14,20,0.95); border-bottom: 1px solid #1e293b;
+    padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .gf-title { font-size: 0.76rem; font-weight: 700; color: #e2e8f0; display: flex; align-items: center; gap: 6px; }
+  .beta-tag { font-size: 0.5rem; color: #f59e0b; border: 1px solid rgba(245,158,11,0.35); border-radius: 10px; padding: 1px 5px; }
+  .gf-pot   { font-size: 0.7rem; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 2px 10px; }
+  .gf-phase { font-size: 0.58rem; font-weight: 700; color: #f59e0b; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 20px; padding: 2px 8px; }
+  .gf-ctx {
+    background: rgba(10,14,20,0.7); border-bottom: 1px solid #1e293b;
+    padding: 3px 14px; font-size: 0.6rem; color: #64748b;
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+  }
+  .badge { display: inline-flex; align-items: center; justify-content: center; font-size: 0.48rem; font-weight: 800; border-radius: 3px; padding: 1px 4px; }
+  .badge-d  { background: #f59e0b; color: #0a0e14; }
+  .badge-sb { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-bb { background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+
+  /* ═══ MAIN AREA: YOU | TABLE | OPPONENTS ═══ */
+  .gf-arena {
+    flex: 1; display: flex; gap: 0;
+    min-height: 0; overflow: hidden;
+  }
+
+  /* ── LEFT: You ── */
+  .you-zone {
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(99,102,241,0.03);
+  }
+
+  .you-cards {
+    display: flex;
+    gap: 10px;
+  }
+  .big-card {
+    width: 64px; height: 92px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .big-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.28) 0%, transparent 55%);
+    border-radius: 8px; pointer-events: none;
+  }
+  .big-card::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    pointer-events: none;
+  }
+  .card-rank-tl {
+    position: absolute; top: 5px; left: 6px;
+    font-size: 1rem; font-weight: 800; font-family: Georgia, serif; line-height: 1;
+  }
+  .card-suit-tl { font-size: 0.65rem; line-height: 1; }
+  .card-center  { font-size: 2rem; line-height: 1; }
+  .card-rank-br {
+    position: absolute; bottom: 5px; right: 6px;
+    font-size: 1rem; font-weight: 800; font-family: Georgia, serif; line-height: 1;
+    transform: rotate(180deg);
+  }
+  .red  { color: #c0171f; }
+  .black { color: #1a1a1a; }
+
+  .you-info {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    text-align: center; width: 100%;
+  }
+  .you-name-row { display: flex; align-items: center; gap: 5px; justify-content: center; }
+  .you-name   { font-size: 0.9rem; font-weight: 700; color: #e2e8f0; }
+  .you-chips  { font-size: 1rem; color: #f59e0b; font-weight: 700; }
+  .you-bet    { font-size: 0.7rem; color: #64748b; }
+  .you-hand   { font-size: 0.65rem; padding: 2px 9px; border-radius: 10px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24; }
+
+  /* ── CENTER: Table ── */
+  .table-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    min-width: 0;
+  }
+  .felt-table {
+    width: 100%;
+    max-width: 340px;
+    background: radial-gradient(ellipse at center, #1c4a1c 0%, #0e2b0e 60%, #091e09 100%);
+    border: 2px solid #2d5a1b; border-radius: 12px;
+    box-shadow: 0 0 0 4px #0d1a09, inset 0 0 20px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px 20px; gap: 8px;
+  }
+  .comm-cards { display: flex; gap: 8px; }
+  .comm-card {
+    width: 42px; height: 60px;
+    background: #fff; border-radius: 5px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .comm-card.empty { background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.12); }
+  .pot-label { font-size: 0.62rem; color: rgba(245,158,11,0.6); letter-spacing: 0.1em; }
+  .placeholder-txt { font-size: 0.65rem; color: rgba(255,255,255,0.2); letter-spacing: 0.08em; }
+
+  /* ── RIGHT: Opponent list ── */
+  .opp-zone {
+    width: 220px;
+    flex-shrink: 0;
+    border-left: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 8px;
+    gap: 6px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .opp-zone::-webkit-scrollbar { display: none; }
+
+  /* 2-col when 6 players */
+  .opp-grid-1 { display: flex; flex-direction: column; gap: 6px; }
+  .opp-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  .opp-panel {
+    background: rgba(17,24,39,0.95);
+    border: 1px solid #1e293b;
+    border-radius: 7px;
+    padding: 8px 10px;
+    display: flex; flex-direction: column; gap: 3px;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+  .opp-panel.active  { border-color: rgba(245,158,11,0.55); box-shadow: 0 0 8px rgba(245,158,11,0.12); }
+  .opp-panel.winner  { border-color: rgba(34,197,94,0.55);  box-shadow: 0 0 8px rgba(34,197,94,0.12); }
+  .opp-panel.folded  { opacity: 0.3; }
+
+  .opp-name-row { display: flex; align-items: center; gap: 4px; }
+  .opp-avatar   { font-size: 0.85rem; }
+  .opp-name     { font-size: 0.75rem; font-weight: 700; color: #cbd5e1; white-space: nowrap; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .opp-chips    { font-size: 0.8rem; color: #f59e0b; font-weight: 700; }
+  .opp-bet      { font-size: 0.65rem; color: #64748b; }
+  .tag          { display: inline-block; font-size: 0.55rem; padding: 1px 6px; border-radius: 8px; margin-top: 1px; }
+  .tag-fold  { background: rgba(255,255,255,0.04); border: 1px solid #1e293b; color: #475569; }
+  .tag-win   { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+  .tag-hand  { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+  .tag-allin { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.25); color: #f43f5e; }
+  .thinking  { font-size: 0.55rem; color: #475569; font-style: italic; }
+
+  .opp-zone-label {
+    font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #334155; text-align: center;
+    padding-bottom: 4px; border-bottom: 1px solid #1e293b;
+    flex-shrink: 0;
+  }
+
+  /* controls */
+  .gf-controls {
+    background: rgba(10,14,20,0.9); border-top: 1px solid #1e293b;
+    padding: 8px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0;
+  }
+  .btn { border: none; border-radius: 6px; font-size: 0.78rem; font-weight: 600; padding: 8px 20px; cursor: pointer; letter-spacing: 0.04em; }
+  .btn-fold  { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); color: #f43f5e; }
+  .btn-call  { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.14); color: #e2e8f0; }
+  .btn-raise { background: linear-gradient(135deg,#f59e0b,#d97706); color: #0a0e14; }
+
+  .layout-demo { display: none; flex-direction: column; }
+  .layout-demo.show { display: flex; }
+</style>
+
+<h2>Design v6 — You left · Table center · Opponents right</h2>
+<p class="subtitle">No hidden card visuals for opponents. Name, chips, bet, status only — compact vertical list. Your cards big and prominent on the left.</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="show(this,'p4')">4 Players</div>
+  <div class="tab" onclick="show(this,'p5')">5 Players</div>
+  <div class="tab" onclick="show(this,'p6')">6 Players</div>
+</div>
+
+<!-- ════ 4P ════ -->
+<div class="game-frame layout-demo show" id="p4">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">RIVER</div>
+    <div class="gf-pot">Pot $148</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> You ·
+    <span class="badge badge-sb">SB</span> Aria $5 ·
+    <span class="badge badge-bb">BB</span> Rex $10
+  </div>
+  <div class="gf-arena">
+
+    <!-- LEFT: YOU -->
+    <div class="you-zone">
+      <div class="you-cards">
+        <div class="big-card">
+          <div class="card-rank-tl black">6<div class="card-suit-tl">♣</div></div>
+          <div class="card-center black">♣</div>
+          <div class="card-rank-br black">6</div>
+        </div>
+        <div class="big-card">
+          <div class="card-rank-tl red">Q<div class="card-suit-tl">♦</div></div>
+          <div class="card-center red">♦</div>
+          <div class="card-rank-br red">Q</div>
+        </div>
+      </div>
+      <div class="you-info">
+        <div class="you-name-row">
+          <span style="font-size:1rem;">♠</span>
+          <span class="you-name">You</span>
+          <span class="badge badge-d">D</span>
+        </div>
+        <div class="you-chips">$218</div>
+        <div class="you-bet">Bet $24</div>
+        <div class="you-hand">Full House</div>
+      </div>
+    </div>
+
+    <!-- CENTER: TABLE -->
+    <div class="table-zone">
+      <div class="felt-table">
+        <div class="comm-cards">
+          <div class="comm-card black">♣</div>
+          <div class="comm-card red">♦</div>
+          <div class="comm-card black">♠</div>
+          <div class="comm-card red">♥</div>
+          <div class="comm-card black">♣</div>
+        </div>
+        <div class="pot-label">POT $148</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: OPPONENTS -->
+    <div class="opp-zone">
+      <div class="opp-zone-label">Players</div>
+      <div class="opp-grid-1">
+        <div class="opp-panel active">
+          <div class="opp-name-row"><span class="opp-avatar">♦</span><span class="opp-name">Rex</span><span class="badge badge-bb">BB</span></div>
+          <div class="opp-chips">$412</div>
+          <div class="opp-bet">Bet $24</div>
+          <div class="thinking">thinking…</div>
+        </div>
+        <div class="opp-panel">
+          <div class="opp-name-row"><span class="opp-avatar">♥</span><span class="opp-name">Aria</span><span class="badge badge-sb">SB</span></div>
+          <div class="opp-chips">$280</div>
+          <div class="opp-bet">Bet $48</div>
+          <div class="tag tag-hand">Two Pair</div>
+        </div>
+        <div class="opp-panel winner">
+          <div class="opp-name-row"><span class="opp-avatar">♣</span><span class="opp-name">Zara</span></div>
+          <div class="opp-chips">$590</div>
+          <div class="opp-bet">Bet $24</div>
+          <div class="tag tag-win">WINNER</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="gf-controls">
+    <button class="btn btn-fold">Fold</button>
+    <button class="btn btn-call">Call $24</button>
+    <button class="btn btn-raise">Raise $72</button>
+  </div>
+</div>
+
+<!-- ════ 5P ════ -->
+<div class="game-frame layout-demo" id="p5">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">FLOP</div>
+    <div class="gf-pot">Pot $85</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> Aria ·
+    <span class="badge badge-sb">SB</span> Rex $5 ·
+    <span class="badge badge-bb">BB</span> Zara $10 · 5 players
+  </div>
+  <div class="gf-arena">
+    <div class="you-zone">
+      <div class="you-cards">
+        <div class="big-card">
+          <div class="card-rank-tl red">A<div class="card-suit-tl">♥</div></div>
+          <div class="card-center red">♥</div>
+          <div class="card-rank-br red">A</div>
+        </div>
+        <div class="big-card">
+          <div class="card-rank-tl black">K<div class="card-suit-tl">♠</div></div>
+          <div class="card-center black">♠</div>
+          <div class="card-rank-br black">K</div>
+        </div>
+      </div>
+      <div class="you-info">
+        <div class="you-name-row"><span style="font-size:1rem;">♠</span><span class="you-name">You</span></div>
+        <div class="you-chips">$280</div>
+        <div class="you-bet">Bet $25</div>
+        <div class="you-hand">Flush Draw</div>
+      </div>
+    </div>
+
+    <div class="table-zone">
+      <div class="felt-table">
+        <div class="comm-cards">
+          <div class="comm-card red">♥</div>
+          <div class="comm-card black">♠</div>
+          <div class="comm-card red">♦</div>
+          <div class="comm-card empty"></div>
+          <div class="comm-card empty"></div>
+        </div>
+        <div class="pot-label">POT $85</div>
+      </div>
+    </div>
+
+    <div class="opp-zone">
+      <div class="opp-zone-label">Players</div>
+      <div class="opp-grid-1">
+        <div class="opp-panel">
+          <div class="opp-name-row"><span class="opp-avatar">♦</span><span class="opp-name">Rex</span><span class="badge badge-sb">SB</span></div>
+          <div class="opp-chips">$462</div>
+          <div class="opp-bet">Bet $10</div>
+        </div>
+        <div class="opp-panel folded">
+          <div class="opp-name-row"><span class="opp-avatar">♥</span><span class="opp-name">Aria</span><span class="badge badge-d">D</span></div>
+          <div class="opp-chips">$438</div>
+          <div class="opp-bet">—</div>
+          <div class="tag tag-fold">FOLDED</div>
+        </div>
+        <div class="opp-panel">
+          <div class="opp-name-row"><span class="opp-avatar">♣</span><span class="opp-name">Zara</span><span class="badge badge-bb">BB</span></div>
+          <div class="opp-chips">$490</div>
+          <div class="opp-bet">Bet $10</div>
+        </div>
+        <div class="opp-panel active">
+          <div class="opp-name-row"><span class="opp-avatar">★</span><span class="opp-name">Max</span></div>
+          <div class="opp-chips">$510</div>
+          <div class="opp-bet">Bet $25</div>
+          <div class="thinking">thinking…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gf-controls">
+    <button class="btn btn-fold">Fold</button>
+    <button class="btn btn-call">Call $25</button>
+    <button class="btn btn-raise">Raise $60</button>
+  </div>
+</div>
+
+<!-- ════ 6P ════ -->
+<div class="game-frame layout-demo" id="p6">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">PREFLOP</div>
+    <div class="gf-pot">Pot $15</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> You ·
+    <span class="badge badge-sb">SB</span> Aria $5 ·
+    <span class="badge badge-bb">BB</span> Rex $10 · 6 players
+  </div>
+  <div class="gf-arena">
+    <div class="you-zone">
+      <div class="you-cards">
+        <div class="big-card">
+          <div class="card-rank-tl black">T<div class="card-suit-tl">♣</div></div>
+          <div class="card-center black">♣</div>
+          <div class="card-rank-br black">T</div>
+        </div>
+        <div class="big-card">
+          <div class="card-rank-tl red">T<div class="card-suit-tl">♥</div></div>
+          <div class="card-center red">♥</div>
+          <div class="card-rank-br red">T</div>
+        </div>
+      </div>
+      <div class="you-info">
+        <div class="you-name-row"><span style="font-size:1rem;">♠</span><span class="you-name">You</span><span class="badge badge-d">D</span></div>
+        <div class="you-chips">$500</div>
+        <div class="you-bet">—</div>
+      </div>
+    </div>
+
+    <div class="table-zone">
+      <div class="felt-table">
+        <div class="placeholder-txt">Waiting for flop…</div>
+        <div class="pot-label" style="margin-top:4px;">POT $15</div>
+      </div>
+    </div>
+
+    <!-- 6p: 2 columns of 3 -->
+    <div class="opp-zone" style="width:260px;">
+      <div class="opp-zone-label">Players</div>
+      <div class="opp-grid-2">
+        <div class="opp-panel">
+          <div class="opp-name-row"><span class="opp-avatar">♦</span><span class="opp-name">Rex</span><span class="badge badge-bb">BB</span></div>
+          <div class="opp-chips">$500</div>
+          <div class="opp-bet">Bet $10</div>
+        </div>
+        <div class="opp-panel">
+          <div class="opp-name-row"><span class="opp-avatar">♣</span><span class="opp-name">Zara</span></div>
+          <div class="opp-chips">$500</div>
+          <div class="opp-bet">—</div>
+        </div>
+        <div class="opp-panel">
+          <div class="opp-name-row"><span class="opp-avatar">♥</span><span class="opp-name">Aria</span><span class="badge badge-sb">SB</span></div>
+          <div class="opp-chips">$495</div>
+          <div class="opp-bet">Bet $5</div>
+        </div>
+        <div class="opp-panel active">
+          <div class="opp-name-row"><span class="opp-avatar">★</span><span class="opp-name">Max</span></div>
+          <div class="opp-chips">$500</div>
+          <div class="opp-bet">—</div>
+          <div class="thinking">thinking…</div>
+        </div>
+        <div class="opp-panel">
+          <div class="opp-name-row"><span class="opp-avatar">◆</span><span class="opp-name">Sam</span></div>
+          <div class="opp-chips">$500</div>
+          <div class="opp-bet">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gf-controls">
+    <button class="btn btn-fold">Fold</button>
+    <button class="btn btn-call">Call $10</button>
+    <button class="btn btn-raise">Raise $20</button>
+  </div>
+</div>
+
+<div style="display:flex;gap:10px;margin-top:14px;">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)"
+    style="flex:1;padding:10px;border-radius:8px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);color:#4ade80;cursor:pointer;font-size:0.78rem;font-weight:600;text-align:center;">
+    ✓ Approve — write the spec
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)"
+    style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid #1e293b;color:#64748b;cursor:pointer;font-size:0.78rem;font-weight:600;text-align:center;">
+    ↩ Still needs changes
+  </div>
+</div>
+
+<script>
+function show(tab, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.layout-demo').forEach(d => d.classList.remove('show'));
+  tab.classList.add('active');
+  document.getElementById(id).classList.add('show');
+}
+</script>

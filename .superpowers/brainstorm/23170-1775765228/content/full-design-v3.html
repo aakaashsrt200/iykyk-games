@@ -1,0 +1,409 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0e14; color: #e2e8f0; }
+
+  h2 { font-size: 1.2rem; color: #f1f5f9; margin-bottom: 4px; }
+  .subtitle { font-size: 0.8rem; color: #64748b; margin-bottom: 18px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tab {
+    padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600;
+    cursor: pointer; border: 1px solid #1e293b; background: #111827; color: #64748b;
+    transition: all 0.15s;
+  }
+  .tab.active { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #f59e0b; }
+
+  .game-frame {
+    background: #0d1117;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 460px;
+    display: flex;
+    flex-direction: column;
+  }
+  .gf-header {
+    background: rgba(10,14,20,0.95); border-bottom: 1px solid #1e293b;
+    padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0;
+  }
+  .gf-title { font-size: 0.76rem; font-weight: 700; letter-spacing: 0.08em; color: #e2e8f0; display: flex; align-items: center; gap: 6px; }
+  .beta-tag { font-size: 0.5rem; color: #f59e0b; border: 1px solid rgba(245,158,11,0.35); border-radius: 10px; padding: 1px 5px; }
+  .gf-pot   { font-size: 0.7rem; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 2px 10px; }
+  .gf-phase { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; color: #f59e0b; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 20px; padding: 2px 8px; }
+  .gf-ctx {
+    background: rgba(10,14,20,0.7); border-bottom: 1px solid #1e293b;
+    padding: 3px 14px; font-size: 0.6rem; color: #64748b;
+    display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+  }
+  .badge { display: inline-flex; align-items: center; justify-content: center; font-size: 0.48rem; font-weight: 800; border-radius: 3px; padding: 1px 4px; line-height: 1; }
+  .badge-d  { background: #f59e0b; color: #0a0e14; }
+  .badge-sb { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-bb { background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+
+  /* ═══ ARENA — hard boundary ═══ */
+  .gf-arena {
+    flex: 1; display: flex; align-items: stretch;
+    padding: 10px; min-height: 0; overflow: hidden;
+  }
+
+  /* ═══ GAME GRID ═══ */
+  .game-grid {
+    width: 100%; display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 8px;
+  }
+
+  /* top / bottom rows: always centered */
+  .row-top, .row-bot {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+
+  /* middle row: space-between with fixed-width children, centered group */
+  .row-mid {
+    display: flex; align-items: center;
+    justify-content: center;   /* CENTER the group — extra space is breathing room */
+    gap: 12px;
+    min-height: 0;
+  }
+
+  /* ═══ PLAYER PANEL — fixed width, content-sized ═══ */
+  .p-panel {
+    background: rgba(17,24,39,0.95);
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    /* FIXED width — never grows */
+    width: 130px;
+    flex-shrink: 0;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .p-panel.active { border-color: rgba(245,158,11,0.55); box-shadow: 0 0 10px rgba(245,158,11,0.15); }
+  .p-panel.winner { border-color: rgba(34,197,94,0.55); box-shadow: 0 0 10px rgba(34,197,94,0.15); }
+  .p-panel.folded { opacity: 0.32; }
+
+  .p-top-row { display: flex; align-items: center; gap: 4px; }
+  .p-avatar { font-size: 0.82rem; }
+  .p-name   { font-size: 0.68rem; font-weight: 600; color: #cbd5e1; white-space: nowrap; }
+  .p-chips  { font-size: 0.75rem; color: #f59e0b; font-weight: 700; }
+  .p-bet    { font-size: 0.6rem; color: #64748b; }
+  .p-hand-tag  { font-size: 0.56rem; padding: 1px 7px; border-radius: 10px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24; white-space: nowrap; }
+  .p-win-tag   { font-size: 0.56rem; padding: 1px 7px; border-radius: 10px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+  .p-fold-tag  { font-size: 0.56rem; padding: 1px 7px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid #1e293b; color: #475569; }
+  .p-thinking  { font-size: 0.52rem; color: #475569; font-style: italic; }
+
+  .cards-row { display: flex; gap: 3px; }
+  .mini-card { border-radius: 2px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.5); background: #fff; flex-shrink: 0; }
+  .mini-card.back { background: linear-gradient(135deg,#1a1a6e,#0d0d4a); border-color: rgba(100,100,200,0.4); }
+  .c-sm { width: 15px; height: 20px; }
+  .c-md { width: 18px; height: 25px; }
+  .c-lg { width: 28px; height: 39px; }
+
+  /* ═══ TABLE — fixed width = 5 cards only ═══ */
+  .felt-table {
+    flex: 0 0 auto;
+    /* 5 × 18px cards + 4 × 5px gaps + 2 × 10px padding = 134px */
+    width: 134px;
+    background: radial-gradient(ellipse at center, #1c4a1c 0%, #0e2b0e 60%, #091e09 100%);
+    border: 2px solid #2d5a1b;
+    border-radius: 10px;
+    box-shadow: 0 0 0 3px #0d1a09, inset 0 0 14px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px;
+    gap: 5px;
+    align-self: stretch;
+  }
+  .comm-cards     { display: flex; gap: 5px; }
+  .pot-inline     { font-size: 0.52rem; color: rgba(245,158,11,0.55); letter-spacing: 0.08em; }
+  .placeholder-txt { font-size: 0.52rem; color: rgba(255,255,255,0.18); letter-spacing: 0.06em; text-align: center; line-height: 1.5; }
+
+  /* ═══ YOU PANEL ═══ */
+  .you-panel {
+    background: rgba(17,24,39,0.98);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .you-info     { display: flex; flex-direction: column; gap: 3px; }
+  .you-name-row { display: flex; align-items: center; gap: 5px; }
+  .you-name     { font-size: 0.8rem; font-weight: 700; color: #e2e8f0; }
+  .you-chips    { font-size: 0.85rem; color: #f59e0b; font-weight: 700; }
+  .you-bet      { font-size: 0.62rem; color: #64748b; }
+
+  /* controls */
+  .gf-controls {
+    background: rgba(10,14,20,0.9); border-top: 1px solid #1e293b;
+    padding: 8px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0;
+  }
+  .btn { border: none; border-radius: 6px; font-size: 0.72rem; font-weight: 600; padding: 7px 18px; cursor: pointer; letter-spacing: 0.04em; white-space: nowrap; }
+  .btn-fold  { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); color: #f43f5e; }
+  .btn-call  { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.14); color: #e2e8f0; }
+  .btn-raise { background: linear-gradient(135deg,#f59e0b,#d97706); color: #0a0e14; }
+
+  .layout-demo { display: none; flex-direction: column; }
+  .layout-demo.show { display: flex; }
+
+  .note { background: #111827; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; font-size: 0.7rem; color: #64748b; line-height: 1.55; margin-top: 12px; }
+  .note strong { color: #94a3b8; }
+</style>
+
+<h2>Design v3 — Fixed panels, centered group</h2>
+<p class="subtitle">Table: fixed to 5-card width. Side panels: fixed content-width. Extra space = breathing room around the group, not stretched panels.</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="show(this,'p4')">4 Players</div>
+  <div class="tab" onclick="show(this,'p5')">5 Players</div>
+  <div class="tab" onclick="show(this,'p6')">6 Players</div>
+</div>
+
+<!-- ══ 4P ══ -->
+<div class="game-frame layout-demo show" id="p4">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">RIVER</div>
+    <div class="gf-pot">Pot $148</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> You ·
+    <span class="badge badge-sb">SB</span> Aria $5 ·
+    <span class="badge badge-bb">BB</span> Rex $10
+  </div>
+  <div class="gf-arena">
+    <div class="game-grid">
+
+      <div class="row-top">
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">♦</span><span class="p-name">Rex</span><span class="badge badge-bb">BB</span></div>
+          <div class="p-chips">$412</div>
+          <div class="p-bet">Bet $24</div>
+          <div class="cards-row"><div class="mini-card c-sm back"></div><div class="mini-card c-sm back"></div></div>
+          <div class="p-thinking">thinking…</div>
+        </div>
+      </div>
+
+      <div class="row-mid">
+        <div class="p-panel active">
+          <div class="p-top-row"><span class="p-avatar">♥</span><span class="p-name">Aria</span><span class="badge badge-sb">SB</span></div>
+          <div class="p-chips">$280</div>
+          <div class="p-bet">Bet $48</div>
+          <div class="cards-row"><div class="mini-card c-md back"></div><div class="mini-card c-md back"></div></div>
+          <div class="p-hand-tag">Two Pair</div>
+        </div>
+
+        <div class="felt-table">
+          <div class="comm-cards">
+            <div class="mini-card c-md"></div><div class="mini-card c-md"></div>
+            <div class="mini-card c-md"></div><div class="mini-card c-md"></div>
+            <div class="mini-card c-md"></div>
+          </div>
+          <div class="pot-inline">POT $148</div>
+        </div>
+
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">♣</span><span class="p-name">Zara</span></div>
+          <div class="p-chips">$590</div>
+          <div class="p-bet">Bet $24</div>
+          <div class="cards-row"><div class="mini-card c-md back"></div><div class="mini-card c-md back"></div></div>
+          <div class="p-win-tag">WINNER</div>
+        </div>
+      </div>
+
+      <div class="row-bot">
+        <div class="you-panel">
+          <div class="you-info">
+            <div class="you-name-row"><span class="p-avatar">♠</span><span class="you-name">You</span><span class="badge badge-d">D</span></div>
+            <div class="you-chips">$218</div>
+            <div class="you-bet">Bet $24</div>
+            <div class="p-hand-tag">Full House</div>
+          </div>
+          <div class="cards-row" style="gap:5px;">
+            <div class="mini-card c-lg"></div><div class="mini-card c-lg"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="gf-controls">
+    <button class="btn btn-fold">Fold</button>
+    <button class="btn btn-call">Call $24</button>
+    <button class="btn btn-raise">Raise $72</button>
+  </div>
+</div>
+
+<!-- ══ 5P ══ -->
+<div class="game-frame layout-demo" id="p5">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">FLOP</div>
+    <div class="gf-pot">Pot $85</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> Aria ·
+    <span class="badge badge-sb">SB</span> Rex $5 ·
+    <span class="badge badge-bb">BB</span> Zara $10 · 5 players
+  </div>
+  <div class="gf-arena">
+    <div class="game-grid">
+
+      <div class="row-top" style="gap:10px;">
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">♦</span><span class="p-name">Rex</span><span class="badge badge-sb">SB</span></div>
+          <div class="p-chips">$462</div><div class="p-bet">Bet $10</div>
+          <div class="cards-row"><div class="mini-card c-sm back"></div><div class="mini-card c-sm back"></div></div>
+        </div>
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">♣</span><span class="p-name">Zara</span><span class="badge badge-bb">BB</span></div>
+          <div class="p-chips">$490</div><div class="p-bet">Bet $10</div>
+          <div class="cards-row"><div class="mini-card c-sm back"></div><div class="mini-card c-sm back"></div></div>
+        </div>
+      </div>
+
+      <div class="row-mid">
+        <div class="p-panel folded">
+          <div class="p-top-row"><span class="p-avatar">♥</span><span class="p-name">Aria</span><span class="badge badge-d">D</span></div>
+          <div class="p-chips">$438</div>
+          <div class="p-fold-tag">FOLDED</div>
+          <div class="cards-row"><div class="mini-card c-md back"></div><div class="mini-card c-md back"></div></div>
+        </div>
+
+        <div class="felt-table">
+          <div class="comm-cards">
+            <div class="mini-card c-md"></div><div class="mini-card c-md"></div>
+            <div class="mini-card c-md"></div>
+            <div class="mini-card c-md" style="background:#1a2535;border-color:#2a3a50;"></div>
+            <div class="mini-card c-md" style="background:#1a2535;border-color:#2a3a50;"></div>
+          </div>
+          <div class="pot-inline">POT $85</div>
+        </div>
+
+        <div class="p-panel active">
+          <div class="p-top-row"><span class="p-avatar">★</span><span class="p-name">Max</span></div>
+          <div class="p-chips">$510</div><div class="p-bet">Bet $25</div>
+          <div class="cards-row"><div class="mini-card c-md back"></div><div class="mini-card c-md back"></div></div>
+          <div class="p-thinking">thinking…</div>
+        </div>
+      </div>
+
+      <div class="row-bot">
+        <div class="you-panel">
+          <div class="you-info">
+            <div class="you-name-row"><span class="p-avatar">♠</span><span class="you-name">You</span></div>
+            <div class="you-chips">$280</div>
+            <div class="you-bet">Bet $25</div>
+            <div class="p-hand-tag">Flush Draw</div>
+          </div>
+          <div class="cards-row" style="gap:5px;">
+            <div class="mini-card c-lg"></div><div class="mini-card c-lg"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="gf-controls">
+    <button class="btn btn-fold">Fold</button>
+    <button class="btn btn-call">Call $25</button>
+    <button class="btn btn-raise">Raise $60</button>
+  </div>
+</div>
+
+<!-- ══ 6P ══ -->
+<div class="game-frame layout-demo" id="p6">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">PREFLOP</div>
+    <div class="gf-pot">Pot $15</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> You ·
+    <span class="badge badge-sb">SB</span> Aria $5 ·
+    <span class="badge badge-bb">BB</span> Rex $10 · 6 players
+  </div>
+  <div class="gf-arena">
+    <div class="game-grid">
+
+      <div class="row-top" style="gap:10px;">
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">♦</span><span class="p-name">Rex</span><span class="badge badge-bb">BB</span></div>
+          <div class="p-chips">$500</div><div class="p-bet">Bet $10</div>
+          <div class="cards-row"><div class="mini-card c-sm back"></div><div class="mini-card c-sm back"></div></div>
+        </div>
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">♣</span><span class="p-name">Zara</span></div>
+          <div class="p-chips">$500</div><div class="p-bet">—</div>
+          <div class="cards-row"><div class="mini-card c-sm back"></div><div class="mini-card c-sm back"></div></div>
+        </div>
+      </div>
+
+      <div class="row-mid">
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">♥</span><span class="p-name">Aria</span><span class="badge badge-sb">SB</span></div>
+          <div class="p-chips">$495</div><div class="p-bet">Bet $5</div>
+          <div class="cards-row"><div class="mini-card c-md back"></div><div class="mini-card c-md back"></div></div>
+        </div>
+
+        <div class="felt-table">
+          <div class="placeholder-txt">Waiting for<br>flop…</div>
+          <div class="pot-inline">POT $15</div>
+        </div>
+
+        <div class="p-panel">
+          <div class="p-top-row"><span class="p-avatar">★</span><span class="p-name">Max</span></div>
+          <div class="p-chips">$500</div><div class="p-bet">—</div>
+          <div class="cards-row"><div class="mini-card c-md back"></div><div class="mini-card c-md back"></div></div>
+        </div>
+      </div>
+
+      <div class="row-bot" style="gap:10px;">
+        <div class="p-panel active">
+          <div class="p-top-row"><span class="p-avatar">◆</span><span class="p-name">Sam</span></div>
+          <div class="p-chips">$500</div><div class="p-bet">—</div>
+          <div class="cards-row"><div class="mini-card c-sm back"></div><div class="mini-card c-sm back"></div></div>
+          <div class="p-thinking">thinking…</div>
+        </div>
+        <div class="you-panel">
+          <div class="you-info">
+            <div class="you-name-row"><span class="p-avatar">♠</span><span class="you-name">You</span><span class="badge badge-d">D</span></div>
+            <div class="you-chips">$500</div>
+            <div class="you-bet">—</div>
+          </div>
+          <div class="cards-row" style="gap:5px;">
+            <div class="mini-card c-lg"></div><div class="mini-card c-lg"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="gf-controls">
+    <button class="btn btn-fold">Fold</button>
+    <button class="btn btn-call">Call $10</button>
+    <button class="btn btn-raise">Raise $20</button>
+  </div>
+</div>
+
+<div class="note">
+  <strong>How it works:</strong> Middle row is <code>justify-content: center</code> with all three items (left panel, table, right panel) at fixed widths. Extra viewport space becomes neutral padding on both sides — nothing stretches. Cards in side panels are proportional to their fixed container.
+</div>
+
+<div style="display:flex;gap:10px;margin-top:12px;">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)"
+    style="flex:1;padding:10px;border-radius:8px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);color:#4ade80;cursor:pointer;font-size:0.78rem;font-weight:600;text-align:center;">
+    ✓ Approve — write the spec
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)"
+    style="flex:1;padding:10px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid #1e293b;color:#64748b;cursor:pointer;font-size:0.78rem;font-weight:600;text-align:center;">
+    ↩ Still needs changes
+  </div>
+</div>
+
+<script>
+function show(tab, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.layout-demo').forEach(d => d.classList.remove('show'));
+  tab.classList.add('active');
+  document.getElementById(id).classList.add('show');
+}
+</script>

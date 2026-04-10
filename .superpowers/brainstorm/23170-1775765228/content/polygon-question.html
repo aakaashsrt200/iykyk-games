@@ -1,0 +1,191 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  h2 { font-size: 1.3rem; color: #f1f5f9; margin-bottom: 6px; }
+  .subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 28px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .option {
+    background: #111827;
+    border: 2px solid #1e293b;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .option:hover { border-color: #334155; transform: translateY(-2px); }
+  .option.selected { border-color: #f59e0b !important; }
+
+  .option-letter {
+    background: #1e293b;
+    padding: 8px 16px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .option-letter span { font-size: 0.9rem; color: #f1f5f9; }
+
+  .mockup-area {
+    padding: 18px 14px;
+    background: #0d1117;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .option-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #1e293b;
+  }
+  .option-title { font-size: 0.9rem; font-weight: 600; color: #f1f5f9; margin-bottom: 4px; }
+  .option-desc { font-size: 0.75rem; color: #64748b; line-height: 1.5; }
+
+  .tag { display: inline-block; font-size: 0.6rem; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.08em; font-weight: 700; margin-left: 6px; }
+  .tag-simple { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+  .tag-fancy { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+
+  /* shared */
+  .mini-card {
+    width: 13px; height: 18px;
+    background: #fff; border-radius: 2px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+  }
+  .mini-card.back { background: linear-gradient(135deg,#1a1a6e,#0d0d4a); border-color: rgba(100,100,200,0.4); }
+  .comm-row { display: flex; gap: 3px; }
+  .player-chip {
+    background: rgba(30,41,59,0.95);
+    border: 1px solid #334155;
+    border-radius: 5px;
+    padding: 3px 5px;
+    font-size: 0.5rem;
+    color: #94a3b8;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .player-chip .nm { color: #cbd5e1; font-weight: 600; font-size: 0.52rem; }
+  .player-chip .cd { display: flex; gap: 1px; }
+  .lbl { font-size: 0.6rem; color: #475569; text-align: center; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+  /* ── Option 1: Rectangle table, players in polygon ring ── */
+  .game-wrap-1 {
+    position: relative;
+    width: 220px;
+    height: 200px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rect-table {
+    background: radial-gradient(ellipse, #1c4a1c 0%, #0e2b0e 70%, #091e09 100%);
+    border: 2px solid #2d5a1b;
+    box-shadow: 0 0 0 3px #0d1a09;
+    border-radius: 10px;
+    width: 110px; height: 50px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* pentagon ring positions */
+  .game-wrap-1 .p1 { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); }
+  .game-wrap-1 .p2 { position: absolute; top: 20px; right: 4px; }
+  .game-wrap-1 .p3 { position: absolute; bottom: 20px; right: 10px; }
+  .game-wrap-1 .p4 { position: absolute; bottom: 20px; left: 10px; }
+  .game-wrap-1 .p5 { position: absolute; top: 20px; left: 4px; }
+
+  /* ── Option 2: Pentagon-shaped table ── */
+  .game-wrap-2 {
+    width: 220px;
+    height: 200px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 4px;
+  }
+  .penta-table-wrap {
+    display: flex; align-items: center; justify-content: center;
+  }
+  .penta-table {
+    width: 100px; height: 75px;
+    background: radial-gradient(ellipse, #1c4a1c 0%, #0e2b0e 70%, #091e09 100%);
+    border: 2px solid #2d5a1b;
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* pentagon comm cards */
+  .penta-comm { display: flex; gap: 2px; margin-top: 24px; }
+  .game-wrap-2 .top-row { display: flex; justify-content: center; gap: 6px; }
+  .game-wrap-2 .mid-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .game-wrap-2 .bot-row { display: flex; justify-content: center; }
+</style>
+
+<h2>For 5-6 players: which table shape?</h2>
+<p class="subtitle">Option C is locked in. This is purely about whether the green felt surface changes shape, or stays rectangular while players rotate into a polygon ring.</p>
+
+<div class="split">
+
+  <!-- Option 1: Rectangle table, polygon seating -->
+  <div class="option" data-choice="rect" onclick="toggleSelect(this)">
+    <div class="option-letter">Option <span>1</span></div>
+    <div class="mockup-area">
+      <div class="lbl">5-player seating (pentagon ring)</div>
+      <div class="game-wrap-1">
+        <div class="rect-table">
+          <div class="comm-row">
+            <div class="mini-card"></div><div class="mini-card"></div>
+            <div class="mini-card"></div><div class="mini-card"></div>
+            <div class="mini-card"></div>
+          </div>
+        </div>
+        <div class="p1 player-chip"><span class="nm">Rex</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+        <div class="p2 player-chip"><span class="nm">Zara</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+        <div class="p3 player-chip" style="border-color:rgba(245,158,11,0.5)"><span class="nm">You</span><span class="cd"><div class="mini-card"></div><div class="mini-card"></div></span></div>
+        <div class="p4 player-chip"><span class="nm">Aria</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+        <div class="p5 player-chip"><span class="nm">Max</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+      </div>
+    </div>
+    <div class="option-footer">
+      <div class="option-title">Rectangle table, polygon seating ring <span class="tag tag-simple">SIMPLER</span></div>
+      <div class="option-desc">Table is always a rounded rectangle. Only the player positions rotate around it in pentagon/hexagon angles. Much simpler CSS — no clip-path needed, guaranteed fit for 5 cards.</div>
+    </div>
+  </div>
+
+  <!-- Option 2: Pentagon table shape -->
+  <div class="option" data-choice="polygon" onclick="toggleSelect(this)">
+    <div class="option-letter">Option <span>2</span></div>
+    <div class="mockup-area">
+      <div class="lbl">5-player seating (pentagon table)</div>
+      <div class="game-wrap-2">
+        <div class="top-row">
+          <div class="player-chip"><span class="nm">Rex</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+          <div class="player-chip"><span class="nm">Zara</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+        </div>
+        <div class="mid-row">
+          <div class="player-chip"><span class="nm">Aria</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+          <div class="penta-table-wrap">
+            <div class="penta-table">
+              <div class="penta-comm">
+                <div class="mini-card" style="width:10px;height:14px;"></div>
+                <div class="mini-card" style="width:10px;height:14px;"></div>
+                <div class="mini-card" style="width:10px;height:14px;"></div>
+                <div class="mini-card" style="width:10px;height:14px;"></div>
+                <div class="mini-card" style="width:10px;height:14px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="player-chip"><span class="nm">Max</span><span class="cd"><div class="mini-card back"></div><div class="mini-card back"></div></span></div>
+        </div>
+        <div class="bot-row">
+          <div class="player-chip" style="border-color:rgba(245,158,11,0.5)"><span class="nm">You</span><span class="cd"><div class="mini-card"></div><div class="mini-card"></div></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="option-footer">
+      <div class="option-title">Pentagon/hexagon table shape <span class="tag tag-fancy">VISUAL</span></div>
+      <div class="option-desc">Table uses CSS clip-path to become a pentagon or hexagon matching the player count. More visually interesting, but community cards must still fit inside the clipped shape — trickier to guarantee.</div>
+    </div>
+  </div>
+
+</div>

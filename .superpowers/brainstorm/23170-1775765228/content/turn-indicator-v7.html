@@ -1,0 +1,410 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0a0e14; color: #e2e8f0; }
+  h2 { font-size: 1.2rem; color: #f1f5f9; margin-bottom: 4px; }
+  .subtitle { font-size: 0.8rem; color: #64748b; margin-bottom: 18px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab { padding: 5px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; cursor: pointer; border: 1px solid #1e293b; background: #111827; color: #64748b; transition: all 0.15s; }
+  .tab.active { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #10b981; }
+  .tab.opp-tab.active { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.35); color: #f59e0b; }
+
+  .game-frame { background: #0d1117; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden; height: 500px; display: flex; flex-direction: column; }
+  .gf-header { background: rgba(10,14,20,0.95); border-bottom: 1px solid #1e293b; padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .gf-title { font-size: 0.76rem; font-weight: 700; color: #e2e8f0; display: flex; align-items: center; gap: 6px; }
+  .beta-tag { font-size: 0.5rem; color: #f59e0b; border: 1px solid rgba(245,158,11,0.35); border-radius: 10px; padding: 1px 5px; }
+  .gf-pot { font-size: 0.7rem; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); border-radius: 6px; padding: 2px 10px; }
+  .gf-phase { font-size: 0.58rem; font-weight: 700; color: #f59e0b; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 20px; padding: 2px 8px; }
+  .gf-ctx { background: rgba(10,14,20,0.7); border-bottom: 1px solid #1e293b; padding: 3px 14px; font-size: 0.6rem; color: #64748b; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; font-size: 0.48rem; font-weight: 800; border-radius: 3px; padding: 1px 4px; }
+  .badge-d  { background: #f59e0b; color: #0a0e14; }
+  .badge-sb { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-bb { background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+
+  /* ══ TURN INDICATOR BANNER ══ — sits in gf-ctx row when it's someone's turn */
+  .turn-banner {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.6rem; font-weight: 700;
+  }
+  .turn-banner .whose { color: #f59e0b; }
+  .turn-dot { width: 5px; height: 5px; border-radius: 50%; background: #f59e0b; animation: blink 1s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+  /* ═══ ARENA ═══ */
+  .gf-arena { flex: 1; display: flex; gap: 0; min-height: 0; overflow: hidden; }
+
+  /* ── LEFT: You ── */
+  .you-zone {
+    width: 200px; flex-shrink: 0;
+    border-right: 1px solid #1e293b;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px; padding: 14px 16px;
+    background: rgba(99,102,241,0.03);
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  }
+
+  /* YOUR TURN state — green glow on left zone */
+  .you-zone.your-turn {
+    border-right-color: rgba(16,185,129,0.45);
+    background: rgba(16,185,129,0.04);
+    box-shadow: inset -2px 0 12px rgba(16,185,129,0.06);
+  }
+
+  .your-turn-badge {
+    font-size: 0.58rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+    background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); color: #10b981;
+    border-radius: 20px; padding: 2px 11px;
+    animation: pulse-green 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse-green { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,0)} 50%{opacity:0.85;box-shadow:0 0 0 4px rgba(16,185,129,0.12)} }
+
+  /* Timer bar */
+  .pk-timer-wrap { width: 100%; display: flex; flex-direction: column; gap: 3px; }
+  .pk-timer-row { display: flex; align-items: center; justify-content: space-between; }
+  .pk-timer-label { font-size: 0.52rem; color: #475569; letter-spacing: 0.08em; text-transform: uppercase; }
+  .pk-countdown { font-size: 0.72rem; font-weight: 800; }
+  .pk-countdown.safe   { color: #10b981; }
+  .pk-countdown.warn   { color: #f59e0b; }
+  .pk-countdown.danger { color: #ef4444; }
+  .pk-timer-track { width: 100%; height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+  .pk-timer-bar { height: 100%; border-radius: 2px; }
+  .pk-timer-bar.safe   { background: #10b981; }
+  .pk-timer-bar.warn   { background: #f59e0b; }
+  .pk-timer-bar.danger { background: #ef4444; }
+
+  .you-cards { display: flex; gap: 10px; }
+  .big-card {
+    width: 64px; height: 92px; background: #fff; border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .big-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.28) 0%,transparent 55%); border-radius:8px; pointer-events:none; }
+  .big-card::after  { content:''; position:absolute; inset:0; border-radius:8px; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1); pointer-events:none; }
+  .card-rank-tl { position:absolute; top:5px; left:6px; font-size:1rem; font-weight:800; font-family:Georgia,serif; line-height:1; }
+  .card-suit-tl { font-size:0.65rem; line-height:1; }
+  .card-center  { font-size:2rem; line-height:1; }
+  .card-rank-br { position:absolute; bottom:5px; right:6px; font-size:1rem; font-weight:800; font-family:Georgia,serif; line-height:1; transform:rotate(180deg); }
+  .red   { color:#c0171f; }
+  .black { color:#1a1a1a; }
+
+  .you-info { display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; width:100%; }
+  .you-name-row { display:flex; align-items:center; gap:5px; justify-content:center; }
+  .you-name   { font-size:0.9rem; font-weight:700; color:#e2e8f0; }
+  .you-chips  { font-size:1rem; color:#f59e0b; font-weight:700; }
+  .you-bet    { font-size:0.7rem; color:#64748b; }
+  .you-hand   { font-size:0.65rem; padding:2px 9px; border-radius:10px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.25); color:#fbbf24; }
+
+  /* ── CENTER: Table ── */
+  .table-zone { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:16px; min-width:0; }
+  .felt-table {
+    width:100%; max-width:340px;
+    background:radial-gradient(ellipse at center,#1c4a1c 0%,#0e2b0e 60%,#091e09 100%);
+    border:2px solid #2d5a1b; border-radius:12px;
+    box-shadow:0 0 0 4px #0d1a09, inset 0 0 20px rgba(0,0,0,0.3);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:16px 20px; gap:8px;
+  }
+  .comm-cards { display:flex; gap:8px; }
+  .comm-card {
+    width:42px; height:60px; background:#fff; border-radius:5px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.5); border:1px solid rgba(0,0,0,0.1);
+    display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+  }
+  .comm-card.empty { background:rgba(255,255,255,0.06); border:1px dashed rgba(255,255,255,0.12); }
+  .pot-label { font-size:0.62rem; color:rgba(245,158,11,0.6); letter-spacing:0.1em; }
+
+  /* Waiting indicator under table */
+  .waiting-pill {
+    display:flex; align-items:center; gap:6px;
+    font-size:0.62rem; color:#64748b; letter-spacing:0.04em;
+    background:rgba(255,255,255,0.03); border:1px solid #1e293b; border-radius:20px; padding:3px 11px;
+  }
+  .waiting-name { color:#f59e0b; font-weight:700; }
+  .waiting-dot { width:4px; height:4px; border-radius:50%; background:#f59e0b; animation:blink 1s ease-in-out infinite; }
+
+  /* ── RIGHT: Opponents ── */
+  .opp-zone { width:220px; flex-shrink:0; border-left:1px solid #1e293b; display:flex; flex-direction:column; padding:10px 8px; gap:6px; overflow-y:auto; scrollbar-width:none; }
+  .opp-zone::-webkit-scrollbar { display:none; }
+  .opp-zone-label { font-size:0.58rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#334155; text-align:center; padding-bottom:4px; border-bottom:1px solid #1e293b; flex-shrink:0; }
+
+  .opp-panel { background:rgba(17,24,39,0.95); border:1px solid #1e293b; border-radius:7px; padding:8px 10px; display:flex; flex-direction:column; gap:3px; transition:border-color 0.25s, box-shadow 0.25s; min-width:0; }
+
+  /* Active opponent — amber glow, consistent with Judgement's purple glow pattern */
+  .opp-panel.active {
+    border-color: rgba(245,158,11,0.6);
+    background: rgba(245,158,11,0.04);
+    box-shadow: 0 0 0 1px rgba(245,158,11,0.15), 0 4px 16px rgba(245,158,11,0.08);
+  }
+  /* Opponent mini-timer (shows only when that opponent is active) */
+  .opp-mini-timer { width:100%; height:2px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; margin-top:2px; }
+  .opp-mini-bar { height:100%; border-radius:2px; background:#f59e0b; }
+
+  .opp-panel.winner  { border-color:rgba(34,197,94,0.55); box-shadow:0 0 8px rgba(34,197,94,0.12); }
+  .opp-panel.folded  { opacity:0.3; }
+
+  .opp-name-row { display:flex; align-items:center; gap:4px; }
+  .opp-avatar   { font-size:0.85rem; }
+  .opp-name     { font-size:0.75rem; font-weight:700; color:#cbd5e1; white-space:nowrap; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .opp-chips    { font-size:0.8rem; color:#f59e0b; font-weight:700; }
+  .opp-bet      { font-size:0.65rem; color:#64748b; }
+  .tag  { display:inline-block; font-size:0.55rem; padding:1px 6px; border-radius:8px; margin-top:1px; }
+  .tag-fold  { background:rgba(255,255,255,0.04); border:1px solid #1e293b; color:#475569; }
+  .tag-allin { background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.25); color:#f43f5e; }
+  .thinking  { font-size:0.55rem; color:#475569; font-style:italic; animation:blink 1.2s ease-in-out infinite; }
+
+  /* ── CONTROLS ── */
+  .gf-controls { background:rgba(10,14,20,0.9); border-top:1px solid #1e293b; padding:8px 16px; display:flex; align-items:center; justify-content:center; gap:10px; flex-shrink:0; }
+  .btn { border:none; border-radius:6px; font-size:0.78rem; font-weight:600; padding:8px 20px; cursor:pointer; letter-spacing:0.04em; }
+  .btn-fold  { background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); color:#f43f5e; }
+  .btn-check { background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.14); color:#e2e8f0; }
+  .btn-raise { background:linear-gradient(135deg,#f59e0b,#d97706); color:#0a0e14; }
+
+  /* waiting state controls */
+  .waiting-controls { display:flex; align-items:center; gap:8px; }
+  .waiting-controls-txt { font-size:0.7rem; color:#334155; font-style:italic; }
+
+  .layout-demo { display:none; flex-direction:column; }
+  .layout-demo.show { display:flex; }
+</style>
+
+<h2>Turn Indicator Design — Poker</h2>
+<p class="subtitle">45-second timer when it's your turn. Clear turn tracking when waiting for an opponent. Consistent with Judgement's timer + active-highlight pattern.</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="show(this,'your-turn')">Your Turn (45s timer)</div>
+  <div class="tab opp-tab" onclick="show(this,'opp-turn')">Waiting for Opponent</div>
+</div>
+
+<!-- ════ STATE A: YOUR TURN ════ -->
+<div class="game-frame layout-demo show" id="your-turn">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">RIVER</div>
+    <div class="gf-pot">Pot $148</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> You ·
+    <span class="badge badge-sb">SB</span> Aria $5 ·
+    <span class="badge badge-bb">BB</span> Rex $10
+    <!-- Turn banner in header row -->
+    <div class="turn-banner" style="margin-left:auto">
+      <div class="turn-dot"></div>
+      <span>Your turn</span>
+    </div>
+  </div>
+  <div class="gf-arena">
+
+    <!-- LEFT: YOU — your-turn state -->
+    <div class="you-zone your-turn">
+
+      <!-- YOUR TURN badge -->
+      <div class="your-turn-badge">YOUR TURN</div>
+
+      <!-- Timer bar -->
+      <div class="pk-timer-wrap">
+        <div class="pk-timer-row">
+          <span class="pk-timer-label">Time left</span>
+          <!-- 30s remaining = safe/green -->
+          <span class="pk-countdown safe">30s</span>
+        </div>
+        <div class="pk-timer-track">
+          <div class="pk-timer-bar safe" style="width:67%"></div>
+        </div>
+      </div>
+
+      <div class="you-cards">
+        <div class="big-card">
+          <div class="card-rank-tl black">6<div class="card-suit-tl">♣</div></div>
+          <div class="card-center black">♣</div>
+          <div class="card-rank-br black">6</div>
+        </div>
+        <div class="big-card">
+          <div class="card-rank-tl red">Q<div class="card-suit-tl">♦</div></div>
+          <div class="card-center red">♦</div>
+          <div class="card-rank-br red">Q</div>
+        </div>
+      </div>
+      <div class="you-info">
+        <div class="you-name-row">
+          <span style="font-size:1rem">♠</span>
+          <span class="you-name">You</span>
+          <span class="badge badge-d">D</span>
+        </div>
+        <div class="you-chips">$218</div>
+        <div class="you-bet">Bet $24</div>
+        <div class="you-hand">Full House</div>
+      </div>
+    </div>
+
+    <!-- CENTER: TABLE -->
+    <div class="table-zone">
+      <div class="felt-table">
+        <div class="comm-cards">
+          <div class="comm-card">🂢</div>
+          <div class="comm-card">🂷</div>
+          <div class="comm-card">🃋</div>
+          <div class="comm-card">🃑</div>
+          <div class="comm-card">🂦</div>
+        </div>
+        <div class="pot-label">POT · $148</div>
+      </div>
+      <!-- No waiting pill — it's your turn, action buttons are live -->
+    </div>
+
+    <!-- RIGHT: Opponents (none active — it's your turn) -->
+    <div class="opp-zone">
+      <div class="opp-zone-label">Players</div>
+      <div class="opp-panel">
+        <div class="opp-name-row"><span class="opp-avatar">🙂</span><span class="opp-name">Aria</span><span class="badge badge-sb">SB</span></div>
+        <div class="opp-chips">$340</div>
+        <div class="opp-bet">Bet $18</div>
+      </div>
+      <div class="opp-panel">
+        <div class="opp-name-row"><span class="opp-avatar">😎</span><span class="opp-name">Rex</span><span class="badge badge-bb">BB</span></div>
+        <div class="opp-chips">$95</div>
+        <div class="opp-bet">Bet $24</div>
+      </div>
+      <div class="opp-panel folded">
+        <div class="opp-name-row"><span class="opp-avatar">🤠</span><span class="opp-name">Kai</span></div>
+        <div class="opp-chips">$210</div>
+        <div class="opp-bet">Folded</div>
+        <span class="tag tag-fold">FOLD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS — visible and active only on your turn -->
+  <div class="gf-controls">
+    <button class="btn btn-fold">Fold</button>
+    <button class="btn btn-check">Check</button>
+    <button class="btn btn-raise">Raise ▲</button>
+  </div>
+</div>
+
+<!-- ════ STATE B: OPPONENT'S TURN ════ -->
+<div class="game-frame layout-demo" id="opp-turn">
+  <div class="gf-header">
+    <div class="gf-title">♠ Texas Hold'em <span class="beta-tag">BETA</span></div>
+    <div class="gf-phase">RIVER</div>
+    <div class="gf-pot">Pot $148</div>
+  </div>
+  <div class="gf-ctx">
+    <span class="badge badge-d">D</span> You ·
+    <span class="badge badge-sb">SB</span> Aria $5 ·
+    <span class="badge badge-bb">BB</span> Rex $10
+    <!-- Whose turn banner -->
+    <div class="turn-banner">
+      <div class="turn-dot"></div>
+      <span class="whose">Aria</span><span style="color:#475569">'s turn</span>
+    </div>
+  </div>
+  <div class="gf-arena">
+
+    <!-- LEFT: YOU — idle (no glow, no timer) -->
+    <div class="you-zone">
+      <div class="you-cards">
+        <div class="big-card">
+          <div class="card-rank-tl black">6<div class="card-suit-tl">♣</div></div>
+          <div class="card-center black">♣</div>
+          <div class="card-rank-br black">6</div>
+        </div>
+        <div class="big-card">
+          <div class="card-rank-tl red">Q<div class="card-suit-tl">♦</div></div>
+          <div class="card-center red">♦</div>
+          <div class="card-rank-br red">Q</div>
+        </div>
+      </div>
+      <div class="you-info">
+        <div class="you-name-row">
+          <span style="font-size:1rem">♠</span>
+          <span class="you-name">You</span>
+          <span class="badge badge-d">D</span>
+        </div>
+        <div class="you-chips">$218</div>
+        <div class="you-bet">Bet $24</div>
+        <div class="you-hand">Full House</div>
+      </div>
+    </div>
+
+    <!-- CENTER: TABLE — with "Waiting for Aria…" pill under table -->
+    <div class="table-zone">
+      <div class="felt-table">
+        <div class="comm-cards">
+          <div class="comm-card">🂢</div>
+          <div class="comm-card">🂷</div>
+          <div class="comm-card">🃋</div>
+          <div class="comm-card">🃑</div>
+          <div class="comm-card">🂦</div>
+        </div>
+        <div class="pot-label">POT · $148</div>
+      </div>
+      <!-- Waiting pill below table -->
+      <div class="waiting-pill">
+        <div class="waiting-dot"></div>
+        Waiting for <span class="waiting-name">&nbsp;Aria&nbsp;</span> to act…
+      </div>
+    </div>
+
+    <!-- RIGHT: Opponents — Aria is active with amber glow + mini timer -->
+    <div class="opp-zone">
+      <div class="opp-zone-label">Players</div>
+
+      <!-- ACTIVE opponent -->
+      <div class="opp-panel active">
+        <div class="opp-name-row"><span class="opp-avatar">🙂</span><span class="opp-name">Aria</span><span class="badge badge-sb">SB</span></div>
+        <div class="opp-chips">$340</div>
+        <div class="opp-bet">Bet $18</div>
+        <span class="thinking">thinking…</span>
+        <!-- Mini depleting timer bar on active opponent -->
+        <div class="opp-mini-timer">
+          <div class="opp-mini-bar" style="width:52%"></div>
+        </div>
+      </div>
+
+      <div class="opp-panel">
+        <div class="opp-name-row"><span class="opp-avatar">😎</span><span class="opp-name">Rex</span><span class="badge badge-bb">BB</span></div>
+        <div class="opp-chips">$95</div>
+        <div class="opp-bet">Bet $24</div>
+      </div>
+      <div class="opp-panel folded">
+        <div class="opp-name-row"><span class="opp-avatar">🤠</span><span class="opp-name">Kai</span></div>
+        <div class="opp-chips">$210</div>
+        <div class="opp-bet">Folded</div>
+        <span class="tag tag-fold">FOLD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS — disabled / hidden when it's not your turn -->
+  <div class="gf-controls">
+    <div class="waiting-controls">
+      <span class="waiting-controls-txt">Waiting for Aria to act…</span>
+    </div>
+  </div>
+</div>
+
+<!-- Also show 10s warning state inline -->
+<div style="margin-top:14px;background:#0d1117;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:14px;">
+  <div style="font-size:0.62rem;color:#475569;text-transform:uppercase;letter-spacing:0.08em;flex-shrink:0">10s WARNING</div>
+  <div class="pk-timer-wrap" style="max-width:160px">
+    <div class="pk-timer-row">
+      <span class="pk-timer-label">Time left</span>
+      <span class="pk-countdown danger">10s</span>
+    </div>
+    <div class="pk-timer-track">
+      <div class="pk-timer-bar danger" style="width:22%"></div>
+    </div>
+  </div>
+  <div style="font-size:0.65rem;color:#64748b">Timer turns red under 10s — same behavior as Judgement game.</div>
+</div>
+
+<script>
+function show(tab, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.layout-demo').forEach(d => { d.classList.remove('show'); });
+  tab.classList.add('active');
+  document.getElementById(id).classList.add('show');
+}
+</script>
