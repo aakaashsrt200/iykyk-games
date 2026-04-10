@@ -48,7 +48,7 @@ export default function PokerRooms() {
           <span className="room-suit" style={{ color: '#f59e0b' }}>♠</span>
           <h1>Poker</h1>
         </div>
-        <p className="room-entry-sub">Texas Hold'em · 2–4 Players · Blinds $5/$10</p>
+        <p className="room-entry-sub">Texas Hold'em · 2–6 Players · Blinds $5/$10</p>
 
         <div className="room-field">
           <label>Your Name</label>

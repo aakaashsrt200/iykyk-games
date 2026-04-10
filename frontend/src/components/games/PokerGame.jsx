@@ -2,14 +2,9 @@
  * PokerGame — Texas Hold'em solo (1 human + 3 bots) or multiplayer via room.
  *
  * Layout: 3-column
- *   [Hand Guide] | [Table + Controls] | [Live Feed]
+ *   [Hand Guide] | [Three-zone arena: You | Table | Opponents] | [Live Feed]
  *
- * Issues fixed:
- *  1. Live Feed panel replaces the tiny log strip
- *  2. SB/BB/D badges on seats so blinds are clear
- *  3. Poker hand rankings guide on left panel
- *  4. Phase label moved inside table; no phantom "top player"
- *  5. 4-player layout: 3 bots + 1 human
+ * Turn timer: 45s for human player, auto-fold on expiry.
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -19,9 +14,10 @@ import '../../styles/Poker.css';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SMALL_BLIND  = 5;
-const BIG_BLIND    = 10;
+const SMALL_BLIND    = 5;
+const BIG_BLIND      = 10;
 const STARTING_CHIPS = 500;
+const TURN_SECONDS   = 45;
 
 const BOT_NAMES = [
   { id: 1, name: 'Aria', avatar: '♥', isHuman: false, chips: STARTING_CHIPS },
@@ -31,9 +27,53 @@ const BOT_NAMES = [
 
 const HUMAN_PLAYER = { id: 0, name: 'You', avatar: '♠', isHuman: true, chips: STARTING_CHIPS };
 
-// Seat position for each player relative to human (clockwise)
-// 4-player: bottom=human, left=p1, top=p2, right=p3
-const POSITIONS_4 = ['bottom', 'left', 'top', 'right'];
+// ─── Inline timer components ──────────────────────────────────────────────────
+
+function TimerBar({ timerStart }) {
+  const [pct, setPct] = useState(100);
+
+  useEffect(() => {
+    if (!timerStart) { setPct(100); return; }
+    const update = () => {
+      const elapsed = Date.now() - new Date(timerStart).getTime();
+      setPct(Math.max(0, 100 - (elapsed / (TURN_SECONDS * 1000)) * 100));
+    };
+    update();
+    const id = setInterval(update, 200);
+    return () => clearInterval(id);
+  }, [timerStart]);
+
+  const tier = pct > 50 ? 'safe' : pct > 25 ? 'warn' : 'danger';
+  return (
+    <div className="pk-timer-wrap">
+      <div className="pk-timer-row">
+        <span className="pk-timer-label">Time left</span>
+        <Countdown timerStart={timerStart} />
+      </div>
+      <div className="pk-timer-track">
+        <div className={`pk-timer-bar ${tier}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function Countdown({ timerStart }) {
+  const [secs, setSecs] = useState(TURN_SECONDS);
+
+  useEffect(() => {
+    if (!timerStart) { setSecs(TURN_SECONDS); return; }
+    const update = () => {
+      const elapsed = (Date.now() - new Date(timerStart).getTime()) / 1000;
+      setSecs(Math.max(0, Math.ceil(TURN_SECONDS - elapsed)));
+    };
+    update();
+    const id = setInterval(update, 500);
+    return () => clearInterval(id);
+  }, [timerStart]);
+
+  const tier = secs > TURN_SECONDS * 0.5 ? 'safe' : secs > TURN_SECONDS * 0.25 ? 'warn' : 'danger';
+  return <span className={`pk-countdown ${tier}`}>{secs}s</span>;
+}
 
 // ─── Hand rankings data ───────────────────────────────────────────────────────
 
@@ -58,7 +98,6 @@ function initRound(players, dealerIdx) {
 
   const sbIdx  = (dealerIdx + 1) % n;
   const bbIdx  = (dealerIdx + 2) % n;
-  // Heads-up: dealer=SB acts first; 3+ players: UTG acts first
   const utgIdx = n === 2 ? dealerIdx : (dealerIdx + 3) % n;
 
   const dealt = players.map(p => ({
@@ -71,7 +110,6 @@ function initRound(players, dealerIdx) {
     lastAction: null,
   }));
 
-  // Deal 2 cards each
   for (let round = 0; round < 2; round++) {
     for (let j = 0; j < dealt.length; j++) {
       const card = deck.pop();
@@ -79,7 +117,6 @@ function initRound(players, dealerIdx) {
     }
   }
 
-  // Post blinds
   const postBlind = (idx, amount) => {
     const actual = Math.min(amount, dealt[idx].chips);
     dealt[idx].chips -= actual;
@@ -136,10 +173,10 @@ function advancePhase(state) {
   let newCommunity = [...communityCards];
 
   if (nextPhase === 'flop') {
-    newDeck.pop(); // burn
+    newDeck.pop();
     newCommunity = [newDeck.pop(), newDeck.pop(), newDeck.pop()];
   } else if (nextPhase === 'turn' || nextPhase === 'river') {
-    newDeck.pop(); // burn
+    newDeck.pop();
     newCommunity = [...newCommunity, newDeck.pop()];
   }
 
@@ -173,10 +210,12 @@ function advancePhase(state) {
 export default function PokerGame() {
   const navigate = useNavigate();
   const [gs, setGs]           = useState(null);
-  const [uiPhase, setUiPhase] = useState('idle'); // idle | playing | result
+  const [uiPhase, setUiPhase] = useState('idle');
   const [raiseAmt, setRaiseAmt] = useState(BIG_BLIND * 2);
-  const aiTimer = useRef(null);
-  const feedRef = useRef(null);
+  const [turnTimerStart, setTurnTimerStart] = useState(null);
+  const aiTimer    = useRef(null);
+  const autoFold   = useRef(null);
+  const feedRef    = useRef(null);
 
   // Auto-scroll feed
   useEffect(() => {
@@ -210,7 +249,6 @@ export default function PokerGame() {
 
     const addFeed = (type, text) => feed.push({ type, player: p.name, text });
 
-    // Clear lastAction for all, set current
     players.forEach(pl => { pl.lastAction = null; });
 
     if (action === 'fold') {
@@ -293,7 +331,36 @@ export default function PokerGame() {
     return () => clearTimeout(aiTimer.current);
   }, [gs?.activeIdx, gs?.phase, uiPhase, applyAction]);
 
-  // ── Showdown ────────────────────────────────────────────────────────────────
+  // ── Human turn timer ────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (autoFold.current) clearTimeout(autoFold.current);
+
+    if (!gs || gs.phase === 'showdown') {
+      setTurnTimerStart(null);
+      return;
+    }
+    const activePlayer = gs.players[gs.activeIdx];
+    if (!activePlayer?.isHuman) {
+      setTurnTimerStart(null);
+      return;
+    }
+
+    const start = new Date().toISOString();
+    setTurnTimerStart(start);
+    autoFold.current = setTimeout(() => {
+      setGs(prev => {
+        if (!prev) return prev;
+        const ap = prev.players[prev.activeIdx];
+        if (!ap?.isHuman) return prev;
+        return applyAction(prev, prev.activeIdx, 'fold');
+      });
+    }, TURN_SECONDS * 1000);
+
+    return () => clearTimeout(autoFold.current);
+  }, [gs?.activeIdx, gs?.phase, applyAction]);
+
+  // ── Showdown: reveal only winner's cards ────────────────────────────────────
 
   useEffect(() => {
     if (!gs || gs.phase !== 'showdown') return;
@@ -301,12 +368,10 @@ export default function PokerGame() {
 
     setGs(prev => {
       if (!prev || prev.winners) return prev;
-      // Reveal all cards temporarily to determine the winner
       const allRevealed = prev.players.map(p => ({
         ...p, holeCards: p.holeCards.map(c => ({ ...c, hidden: false })),
       }));
       const winIds = determineWinners(allRevealed, prev.communityCards);
-      // Only keep winner cards face-up; human always sees their own cards
       const finalPlayers = prev.players.map(p => ({
         ...p,
         holeCards: p.holeCards.map(c => ({
@@ -345,17 +410,6 @@ export default function PokerGame() {
     startHand(gs.players, nextDealer, (gs.handNum || 1) + 1);
   }, [gs, startHand]);
 
-  // ─── Derived ───────────────────────────────────────────────────────────────
-
-  const humanPlayer  = gs?.players.find(p => p.isHuman);
-  const isHumanTurn  = gs && gs.activeIdx >= 0 && gs.players[gs.activeIdx]?.isHuman;
-  const toCall       = humanPlayer ? Math.max(0, (gs?.currentBet || 0) - humanPlayer.bet) : 0;
-  const canCheck     = toCall === 0;
-  const canCall      = toCall > 0 && (humanPlayer?.chips || 0) >= toCall;
-  const canRaise     = (humanPlayer?.chips || 0) > toCall;
-  const maxRaise     = humanPlayer ? humanPlayer.chips + humanPlayer.bet : 0;
-  const minRaise     = Math.max((gs?.currentBet || 0) + BIG_BLIND, BIG_BLIND * 2);
-
   // ─── Idle screen ───────────────────────────────────────────────────────────
 
   if (uiPhase === 'idle') {
@@ -374,7 +428,7 @@ export default function PokerGame() {
           <div className="pk-idle-card">
             <div className="pk-idle-icon">♠</div>
             <h1 className="pk-idle-title">Texas Hold'em Poker</h1>
-            <p className="pk-idle-sub">Blinds $5/$10 · Start $500 · 3 bots</p>
+            <p className="pk-idle-sub">Blinds $5/$10 · Start $500 · 3 bots · 45s turn timer</p>
 
             <div className="pk-idle-players">
               <div className="pk-idle-player you">
@@ -436,13 +490,29 @@ export default function PokerGame() {
   if (!gs) return null;
 
   const { players, communityCards, pot, phase, activeIdx, dealerIdx, sbIdx, bbIdx, feed, winners, handNum } = gs;
-  const humanIdx = players.findIndex(p => p.isHuman);
 
-  // Build seat positions relative to human
-  const seatPositions = players.map((_, i) => {
-    const offset = (i - humanIdx + players.length) % players.length;
-    return POSITIONS_4[offset] || 'top';
-  });
+  // Derived
+  const humanIdx      = players.findIndex(p => p.isHuman);
+  const humanPlayer   = players[humanIdx];
+  const opponents     = players.filter(p => !p.isHuman);
+
+  const isHumanTurn   = activeIdx >= 0 && players[activeIdx]?.isHuman && phase !== 'showdown';
+  const isHumanDealer = humanIdx === dealerIdx;
+  const isHumanSB     = humanIdx === sbIdx;
+  const isHumanBB     = humanIdx === bbIdx;
+  const isHumanWinner = winners?.includes(humanPlayer?.id);
+  const humanHandEval = (phase === 'showdown' || winners) && humanPlayer
+    ? bestHand(humanPlayer.holeCards, communityCards) : null;
+
+  const toCall    = humanPlayer ? Math.max(0, (gs.currentBet || 0) - humanPlayer.bet) : 0;
+  const canCheck  = toCall === 0;
+  const canCall   = toCall > 0 && (humanPlayer?.chips || 0) >= toCall;
+  const canRaise  = (humanPlayer?.chips || 0) > toCall;
+  const maxRaise  = humanPlayer ? humanPlayer.chips + humanPlayer.bet : 0;
+  const minRaise  = Math.max((gs.currentBet || 0) + BIG_BLIND, BIG_BLIND * 2);
+
+  const activeOpponent = activeIdx >= 0 && !players[activeIdx]?.isHuman ? players[activeIdx] : null;
+  const is6Players = opponents.length >= 5;
 
   return (
     <div className="pk-page pk-game-page">
@@ -463,7 +533,7 @@ export default function PokerGame() {
         </div>
       </header>
 
-      {/* ── 3-column layout ── */}
+      {/* ── 3-column outer layout ── */}
       <div className="pk-layout">
 
         {/* LEFT: Hand Guide */}
@@ -493,14 +563,14 @@ export default function PokerGame() {
           </div>
         </aside>
 
-        {/* CENTER: Table + Controls */}
+        {/* CENTER: Main play area */}
         <main className="pk-main">
 
-          {/* Blinds context bar */}
+          {/* Blinds + Turn context bar */}
           <div className="pk-context-bar">
             <span className="pk-ctx-item">
               <span className="pk-ctx-badge dealer">D</span>
-              {players[dealerIdx]?.name} (Dealer)
+              {players[dealerIdx]?.name}
             </span>
             <span className="pk-ctx-sep">·</span>
             <span className="pk-ctx-item">
@@ -512,91 +582,161 @@ export default function PokerGame() {
               <span className="pk-ctx-badge bb">BB</span>
               {players[bbIdx]?.name} ${BIG_BLIND}
             </span>
-            <span className="pk-ctx-sep">·</span>
-            <span className="pk-ctx-phase">{phase.toUpperCase()}</span>
+
+            {/* Right side: turn indicator + phase */}
+            <div className="pk-ctx-right">
+              {phase !== 'showdown' && activeIdx >= 0 && (
+                <div className="pk-turn-indicator">
+                  <div className={`pk-turn-dot${isHumanTurn ? ' green' : ''}`} />
+                  {isHumanTurn ? (
+                    <span className="pk-turn-you">Your turn</span>
+                  ) : (
+                    <>
+                      <span className="pk-turn-name">{players[activeIdx]?.name}</span>
+                      <span className="pk-turn-rest">'s turn</span>
+                    </>
+                  )}
+                </div>
+              )}
+              <span className="pk-ctx-phase">{phase.toUpperCase()}</span>
+            </div>
           </div>
 
-          {/* Table */}
-          <div className="pk-table-wrap">
-            <div className="pk-felt">
+          {/* ── Three-zone arena ── */}
+          <div className="pk-arena">
 
-              {/* Community cards area — center of felt */}
-              <div className="pk-community-area">
-                {communityCards.length === 0 ? (
-                  <div className="pk-community-placeholder">Waiting for flop…</div>
-                ) : (
-                  <div className="pk-community-cards">
-                    {communityCards.map((card, i) => (
-                      <PokerCard key={i} card={card} index={i} />
-                    ))}
+            {/* ── YOU ZONE (left) ── */}
+            <div className={`pk-you-zone${isHumanTurn ? ' your-turn' : ''}`}>
+              {isHumanTurn && <div className="pk-your-turn-badge">YOUR TURN</div>}
+              {isHumanTurn && <TimerBar timerStart={turnTimerStart} />}
+
+              <div className="pk-you-cards">
+                {humanPlayer?.holeCards.map((card, i) => (
+                  <PokerCard key={i} card={card} index={i} />
+                ))}
+              </div>
+
+              <div className="pk-you-info">
+                <div className="pk-you-name-row">
+                  <span className="pk-header-suit" style={{ fontSize: '0.9rem' }}>♠</span>
+                  <span className="pk-you-name">You</span>
+                  {isHumanDealer && <span className="pk-role-badge pk-dealer-d">D</span>}
+                  {isHumanSB && !isHumanDealer && <span className="pk-role-badge pk-sb-badge">SB</span>}
+                  {isHumanBB && <span className="pk-role-badge pk-bb-badge">BB</span>}
+                </div>
+                <div className="pk-you-chips">${humanPlayer?.chips ?? 0}</div>
+                {(humanPlayer?.bet ?? 0) > 0 && (
+                  <div className="pk-you-bet">Bet ${humanPlayer.bet}</div>
+                )}
+                {humanPlayer?.allIn  && <div className="pk-status-tag pk-allin">ALL IN</div>}
+                {humanPlayer?.folded && <div className="pk-status-tag pk-fold-tag">FOLDED</div>}
+                {isHumanWinner       && <div className="pk-status-tag pk-win-tag">WINNER</div>}
+                {humanHandEval && !humanPlayer?.folded && (
+                  <div className="pk-you-hand">{humanHandEval.name}</div>
+                )}
+                {humanPlayer?.lastAction && (
+                  <div className={`pk-last-action pk-action-${humanPlayer.lastAction.split(' ')[0]}`}>
+                    {humanPlayer.lastAction}
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Player seats */}
-              {players.map((p, i) => {
-                const seat      = seatPositions[i];
-                const isDealer  = i === dealerIdx;
-                const isSB      = i === sbIdx;
-                const isBB      = i === bbIdx;
-                const isActive  = i === activeIdx && phase !== 'showdown';
-                const isWinner  = winners?.includes(p.id);
-                const handEval  = (phase === 'showdown' || winners) && (isWinner || p.isHuman)
-                  ? bestHand(p.holeCards, communityCards)
-                  : null;
+            {/* ── TABLE ZONE (center) ── */}
+            <div className="pk-table-zone">
+              <div className="pk-felt">
+                <div className="pk-community-area">
+                  {communityCards.length === 0 ? (
+                    <div className="pk-community-placeholder">Waiting for flop…</div>
+                  ) : (
+                    <div className="pk-community-cards">
+                      {communityCards.map((card, i) => (
+                        <PokerCard key={i} card={card} index={i} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="pk-pot-center">POT · ${pot}</div>
+              </div>
 
-                return (
-                  <div
-                    key={p.id}
-                    className={[
-                      'pk-seat',
-                      `pk-seat-${seat}`,
-                      isActive ? 'pk-active' : '',
-                      p.folded  ? 'pk-folded' : '',
-                      isWinner  ? 'pk-winner' : '',
-                    ].filter(Boolean).join(' ')}
-                  >
-                    {/* Info chip */}
-                    <div className="pk-seat-chip">
-                      <div className="pk-seat-top-row">
-                        <span className="pk-seat-avatar">{p.avatar}</span>
-                        <span className="pk-seat-name">{p.name}{p.isHuman ? ' (You)' : ''}</span>
+              {/* Waiting pill — shows whose turn it is when it's not yours */}
+              {!isHumanTurn && activeOpponent && phase !== 'showdown' && (
+                <div className="pk-waiting-pill">
+                  <div className="pk-waiting-dot" />
+                  Waiting for{' '}
+                  <span className="pk-waiting-pill-name">{activeOpponent.name}</span>
+                  {' '}to act…
+                </div>
+              )}
+            </div>
+
+            {/* ── OPPONENT ZONE (right) ── */}
+            <div className={`pk-opp-zone${is6Players ? ' pk-opp-6p' : ''}`}>
+              <div className="pk-opp-zone-label">Players</div>
+              <div className={is6Players ? 'pk-opp-grid-2' : 'pk-opp-grid-1'}>
+                {opponents.map(p => {
+                  const pIdx     = players.indexOf(p);
+                  const isActive = pIdx === activeIdx && phase !== 'showdown';
+                  const isWinner = winners?.includes(p.id);
+                  const isDealer = pIdx === dealerIdx;
+                  const isSB     = pIdx === sbIdx;
+                  const isBB     = pIdx === bbIdx;
+                  const oppHandEval = isWinner
+                    ? bestHand(p.holeCards, communityCards) : null;
+
+                  return (
+                    <div
+                      key={p.id}
+                      className={[
+                        'pk-opp-panel',
+                        isActive ? 'active'  : '',
+                        isWinner ? 'winner'  : '',
+                        p.folded ? 'folded'  : '',
+                      ].filter(Boolean).join(' ')}
+                    >
+                      <div className="pk-opp-name-row">
+                        <span className="pk-opp-avatar">{p.avatar}</span>
+                        <span className="pk-opp-name">{p.name}</span>
                         {isDealer && <span className="pk-role-badge pk-dealer-d">D</span>}
                         {isSB && !isDealer && <span className="pk-role-badge pk-sb-badge">SB</span>}
                         {isBB && <span className="pk-role-badge pk-bb-badge">BB</span>}
                       </div>
-                      <div className="pk-seat-chips">${p.chips}</div>
-                      {p.bet > 0 && <div className="pk-seat-bet">Bet ${p.bet}</div>}
-                      {p.allIn  && <div className="pk-status-tag pk-allin">ALL IN</div>}
-                      {p.folded && <div className="pk-status-tag pk-fold-tag">FOLDED</div>}
-                      {isWinner && <div className="pk-status-tag pk-win-tag">WINNER</div>}
-                      {handEval && !p.folded && (
-                        <div className="pk-hand-eval">{handEval.name}</div>
+                      <div className="pk-opp-chips">${p.chips}</div>
+                      {p.bet > 0 && <div className="pk-opp-bet">Bet ${p.bet}</div>}
+                      {p.allIn   && <div className="pk-status-tag pk-allin">ALL IN</div>}
+                      {p.folded  && <div className="pk-status-tag pk-fold-tag">FOLDED</div>}
+                      {isWinner  && <div className="pk-status-tag pk-win-tag">WINNER</div>}
+                      {oppHandEval && !p.folded && (
+                        <div className="pk-hand-eval">{oppHandEval.name}</div>
                       )}
-                      {isActive && !p.isHuman && (
-                        <div className="pk-thinking-badge">thinking…</div>
+                      {/* Revealed winner cards at showdown */}
+                      {isWinner && p.holeCards.some(c => !c.hidden) && (
+                        <div className="pk-opp-showdown-cards">
+                          {p.holeCards.map((card, ci) => (
+                            <PokerCard key={ci} card={card} index={ci} />
+                          ))}
+                        </div>
                       )}
-                      {p.lastAction && (
+                      {p.lastAction && !p.folded && !isWinner && (
                         <div className={`pk-last-action pk-action-${p.lastAction.split(' ')[0]}`}>
                           {p.lastAction}
                         </div>
                       )}
+                      {isActive && <span className="pk-thinking-badge">thinking…</span>}
+                      {isActive && (
+                        <div className="pk-opp-mini-timer">
+                          <div className="pk-opp-mini-bar" />
+                        </div>
+                      )}
                     </div>
-
-                    {/* Cards */}
-                    <div className={`pk-hole-cards ${p.isHuman ? 'pk-yours' : ''}`}>
-                      {p.holeCards.map((card, ci) => (
-                        <PokerCard key={ci} card={card} index={ci} small={!p.isHuman} />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Controls */}
+          </div>{/* end pk-arena */}
+
+          {/* ── Controls ── */}
           <div className="pk-controls">
             {phase === 'showdown' && winners ? (
               <div className="pk-showdown-bar">
@@ -713,20 +853,17 @@ function FeedEntry({ entry }) {
 
 // ─── Poker Card ───────────────────────────────────────────────────────────────
 
-function PokerCard({ card, index, small }) {
+function PokerCard({ card, index }) {
   if (card.hidden) {
     return (
-      <div
-        className={`pk-card pk-card-back ${small ? 'pk-card-sm' : ''}`}
-        style={{ '--ci': index }}
-      >
+      <div className="pk-card pk-card-back" style={{ '--ci': index }}>
         <div className="pk-card-back-inner" />
       </div>
     );
   }
   return (
     <div
-      className={`pk-card ${card.red ? 'pk-card-red' : 'pk-card-black'} ${small ? 'pk-card-sm' : ''}`}
+      className={`pk-card ${card.red ? 'pk-card-red' : 'pk-card-black'}`}
       style={{ '--ci': index }}
     >
       <div className="pk-card-tl">
