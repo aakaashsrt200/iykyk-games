@@ -644,30 +644,109 @@ export default function PokerGame() {
 
             {/* ── TABLE ZONE (center) ── */}
             <div className="pk-table-zone">
-              <div className="pk-felt">
-                <div className="pk-community-area">
-                  {communityCards.length === 0 ? (
-                    <div className="pk-community-placeholder">Waiting for flop…</div>
-                  ) : (
-                    <div className="pk-community-cards">
-                      {communityCards.map((card, i) => (
-                        <PokerCard key={i} card={card} index={i} />
-                      ))}
-                    </div>
-                  )}
+              {/* Table top: felt + pill centered in the zone */}
+              <div className="pk-table-top">
+                <div className="pk-felt">
+                  <div className="pk-community-area">
+                    {communityCards.length === 0 ? (
+                      <div className="pk-community-placeholder">Waiting for flop…</div>
+                    ) : (
+                      <div className="pk-community-cards">
+                        {communityCards.map((card, i) => (
+                          <PokerCard key={i} card={card} index={i} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="pk-pot-center">POT · ${pot}</div>
                 </div>
-                <div className="pk-pot-center">POT · ${pot}</div>
+
+                {/* Waiting pill — shows whose turn it is when it's not yours */}
+                {!isHumanTurn && activeOpponent && phase !== 'showdown' && (
+                  <div className="pk-waiting-pill">
+                    <div className="pk-waiting-dot" />
+                    Waiting for{' '}
+                    <span className="pk-waiting-pill-name">{activeOpponent.name}</span>
+                    {' '}to act…
+                  </div>
+                )}
               </div>
 
-              {/* Waiting pill — shows whose turn it is when it's not yours */}
-              {!isHumanTurn && activeOpponent && phase !== 'showdown' && (
-                <div className="pk-waiting-pill">
-                  <div className="pk-waiting-dot" />
-                  Waiting for{' '}
-                  <span className="pk-waiting-pill-name">{activeOpponent.name}</span>
-                  {' '}to act…
-                </div>
-              )}
+              {/* ── Controls ── */}
+              <div className="pk-controls">
+                {phase === 'showdown' && winners ? (
+                  <div className="pk-showdown-bar">
+                    <span className="pk-showdown-msg">
+                      {winners.length === 1
+                        ? `${players.find(p => p.id === winners[0])?.name} wins the hand!`
+                        : 'Split pot!'}
+                    </span>
+                    <button className="pk-primary-btn pk-btn-inline" onClick={handleNextHand}>
+                      Next Hand →
+                    </button>
+                  </div>
+                ) : isHumanTurn ? (
+                  <div className="pk-action-panel">
+                    <div className="pk-action-context">
+                      {toCall > 0 ? (
+                        <span className="pk-call-context">
+                          To call: <strong>${toCall}</strong>
+                          {toCall === BIG_BLIND && phase === 'preflop' ? ' (Big Blind)' : ''}
+                        </span>
+                      ) : (
+                        <span className="pk-call-context">Your turn — free to check or bet</span>
+                      )}
+                    </div>
+                    <div className="pk-action-row">
+                      <button className="pk-btn pk-btn-fold" onClick={() => humanAction('fold')}>
+                        Fold
+                      </button>
+                      {canCheck ? (
+                        <button className="pk-btn pk-btn-check" onClick={() => humanAction('check')}>
+                          Check
+                        </button>
+                      ) : (
+                        <button className="pk-btn pk-btn-call" onClick={() => humanAction('call')} disabled={!canCall}>
+                          Call ${toCall}
+                        </button>
+                      )}
+                      {canRaise && (
+                        <button
+                          className="pk-btn pk-btn-raise"
+                          onClick={() => humanAction('raise', raiseAmt)}
+                          disabled={raiseAmt > maxRaise}
+                        >
+                          {canCheck ? 'Bet' : 'Raise'} ${raiseAmt}
+                        </button>
+                      )}
+                    </div>
+                    {canRaise && (
+                      <div className="pk-raise-row">
+                        <span className="pk-raise-label">${minRaise}</span>
+                        <input
+                          type="range"
+                          className="pk-slider"
+                          min={minRaise}
+                          max={maxRaise}
+                          step={BIG_BLIND}
+                          value={raiseAmt}
+                          onChange={e => setRaiseAmt(Number(e.target.value))}
+                        />
+                        <span className="pk-raise-label">${maxRaise} (All in)</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="pk-waiting-bar">
+                    <span className="pk-waiting-dot" />
+                    <span className="pk-waiting-text">
+                      {activeIdx >= 0 && players[activeIdx]
+                        ? `${players[activeIdx].name} is thinking…`
+                        : 'Processing…'}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* ── OPPONENT ZONE (right) ── */}
@@ -735,82 +814,6 @@ export default function PokerGame() {
             </div>
 
           </div>{/* end pk-arena */}
-
-          {/* ── Controls ── */}
-          <div className="pk-controls">
-            {phase === 'showdown' && winners ? (
-              <div className="pk-showdown-bar">
-                <span className="pk-showdown-msg">
-                  {winners.length === 1
-                    ? `${players.find(p => p.id === winners[0])?.name} wins the hand!`
-                    : 'Split pot!'}
-                </span>
-                <button className="pk-primary-btn pk-btn-inline" onClick={handleNextHand}>
-                  Next Hand →
-                </button>
-              </div>
-            ) : isHumanTurn ? (
-              <div className="pk-action-panel">
-                <div className="pk-action-context">
-                  {toCall > 0 ? (
-                    <span className="pk-call-context">
-                      To call: <strong>${toCall}</strong>
-                      {toCall === BIG_BLIND && phase === 'preflop' ? ' (Big Blind)' : ''}
-                    </span>
-                  ) : (
-                    <span className="pk-call-context">Your turn — free to check or bet</span>
-                  )}
-                </div>
-                <div className="pk-action-row">
-                  <button className="pk-btn pk-btn-fold" onClick={() => humanAction('fold')}>
-                    Fold
-                  </button>
-                  {canCheck ? (
-                    <button className="pk-btn pk-btn-check" onClick={() => humanAction('check')}>
-                      Check
-                    </button>
-                  ) : (
-                    <button className="pk-btn pk-btn-call" onClick={() => humanAction('call')} disabled={!canCall}>
-                      Call ${toCall}
-                    </button>
-                  )}
-                  {canRaise && (
-                    <button
-                      className="pk-btn pk-btn-raise"
-                      onClick={() => humanAction('raise', raiseAmt)}
-                      disabled={raiseAmt > maxRaise}
-                    >
-                      {canCheck ? 'Bet' : 'Raise'} ${raiseAmt}
-                    </button>
-                  )}
-                </div>
-                {canRaise && (
-                  <div className="pk-raise-row">
-                    <span className="pk-raise-label">${minRaise}</span>
-                    <input
-                      type="range"
-                      className="pk-slider"
-                      min={minRaise}
-                      max={maxRaise}
-                      step={BIG_BLIND}
-                      value={raiseAmt}
-                      onChange={e => setRaiseAmt(Number(e.target.value))}
-                    />
-                    <span className="pk-raise-label">${maxRaise} (All in)</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="pk-waiting-bar">
-                <span className="pk-waiting-dot" />
-                <span className="pk-waiting-text">
-                  {activeIdx >= 0 && players[activeIdx]
-                    ? `${players[activeIdx].name} is thinking…`
-                    : 'Processing…'}
-                </span>
-              </div>
-            )}
-          </div>
         </main>
 
         {/* RIGHT: Live Feed */}
